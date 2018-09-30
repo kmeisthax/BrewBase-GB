@@ -1,8 +1,5 @@
 INCLUDE "lib/brewbase.inc"
 
-SECTION "NDMA Request Memory", WRAM0
-W_LCDC_NDMARequestArena:: ds M_LCDC_NDMARequestSize * M_LCDC_NDMARequestCount
-
 SECTION "NDMA Requests", ROM0
 ;Resolve pending NDMA requests, if any.
 ;
@@ -12,15 +9,15 @@ SECTION "NDMA Requests", ROM0
 ;routine is thus unsuitable for use outside of V-blank. Ideally, it should be
 ;executed first thing as part of the VBlank IRQ. Care is taken within the
 ;routine to avoid exhausting VBlank time entirely, transfers are capped to 6kb
-;total
+;total.
 LCDC_ResolvePendingNDMA::
     ld d, 0     ;current arena entry
     ld bc, M_LCDC_NDMARequestProcessingCap    ;total processing time remaining
-    ld hl, W_LCDC_NDMARequestArena
+    ld hl, W_LCDC_VallocArena
     
 .processEntry
     ld a, [hli]
-    cp M_LCDC_NDMARequestStatusReady
+    cp M_LCDC_VallocStatusDirty
     jr nz, .skipDMAEntry
     
     push hl
@@ -77,17 +74,17 @@ LCDC_ResolvePendingNDMA::
     ld c, a
     
     ;Mark the transfer as completed.
-    ld a, M_LCDC_NDMARequestStatusCompleted
+    ld a, M_LCDC_VallocStatusClean
     ld [hl], a
     
 .skipDMAEntry
     inc d
     ld a, d
-    cp M_LCDC_NDMARequestCount
+    cp M_LCDC_VallocCount
     jr z, .exitDMAProcessing
     
     ld a, l
-    add M_LCDC_NDMARequestSize
+    add M_LCDC_VallocSize
     ld l, a
     jr nc, .processEntry
     inc h
