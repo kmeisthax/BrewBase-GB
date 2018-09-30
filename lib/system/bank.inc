@@ -14,6 +14,10 @@ M_System_FarRead: MACRO
     rst $10
     ENDM
 
-M_System_FarCopy: MACRO
+M_System_FarSnap: MACRO
     rst $18
+    ENDM
+
+M_System_FarCopy: MACRO
+    rst $20
     ENDM

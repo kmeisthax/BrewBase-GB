@@ -29,7 +29,13 @@ SECTION "PBase RST Bank Services 3", ROM0[$0010]
 System_FarRead::
     jp System_FarRead_int
 
-SECTION "PBase RST Bank Services 4", ROM0[$0018]
+SECTION "PBase RST Bank Services 3", ROM0[$0018]
+;Read two bytes from A:HL and store it in HL.
+;Ideal for reading pointers in far memory.
+System_FarSnap::
+    jp System_FarSnap_int
+
+SECTION "PBase RST Bank Services 4", ROM0[$0020]
 ;Copy BC bytes from A:HL to DE.
 ;HL and DE will point to the end of their respective buffers.
 System_FarCopy::
@@ -122,6 +128,18 @@ System_FarRead_int::
     ld [$2000], a
     
     pop af
+    ret
+
+System_FarSnap_int::
+    ld [$2000], a
+    
+    ld a, [hli]
+    ld h, [hl]
+    ld l, a
+    
+    ld a, [H_System_CurBank]
+    ld [$2000], a
+    
     ret
 
 System_FarCopy_int::
