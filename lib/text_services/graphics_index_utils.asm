@@ -12,7 +12,7 @@ TextServices_GetWindowCursorTile:
     ld a, [hl]
     push af
     
-    ld de, M_TextServices_WindowBacking
+    ld de, M_TextServices_WindowBacking + 1
     add hl, de
     ld a, [hli]
     ld h, [hl]
