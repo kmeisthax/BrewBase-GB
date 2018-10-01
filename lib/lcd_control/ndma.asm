@@ -92,9 +92,9 @@ LCDC_ResolvePendingNDMA::
     
 .exitDMAProcessing
     ;Unclobber banks. TODO: What of REG_VBK?
-    ld a, [W_System_CurBank]
+    ld a, [H_System_CurBank]
     ld [$2000], a
-    ld a, [W_System_CurRamBank]
+    ld a, [H_System_CurRamBank]
     ld [REG_SVBK], a
     
     ret
