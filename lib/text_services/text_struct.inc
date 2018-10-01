@@ -38,15 +38,16 @@ M_TextServices_WindowRowBaseline EQU $3;How many lines is the baseline
 ;text.
 M_TextServices_WindowCursorX EQU $4  ;X index of tile currently being drawn to.
 M_TextServices_WindowCursorY EQU $5  ;Y index of tile currently being drawn to.
-M_TextServices_WindowShiftX EQU $6   ;How many pixels into the current tile
+M_TextServices_WindowCursor EQU $6   ;Far pointer to current cursor tile.
+M_TextServices_WindowShiftX EQU $8   ;How many pixels into the current tile
                                      ;we have already drawn
-M_TextServices_WindowShiftY EQU $7   ;How many lines down into the current tile
+M_TextServices_WindowShiftY EQU $9   ;How many lines down into the current tile
                                      ;we have already drawn
 
 ;The Font is the set of glyphs used to draw text.
-M_TextServices_WindowFont EQU $8     ;Far pointer to font structure
+M_TextServices_WindowFont EQU $A     ;Far pointer to font structure
 
-M_TextServices_WindowBacking EQU $B  ;Far pointer to writable memory buffer
+M_TextServices_WindowBacking EQU $D  ;Far pointer to writable memory buffer
                                      ;large enough to store Width*Height tiles.
 
-M_TextServices_WindowSize EQU $B
+M_TextServices_WindowSize EQU $10
