@@ -9,7 +9,9 @@ M_TextServices_FontSize EQU $9 ;Size of the font header structure.
 
 ;Glyph data is formatted as an array of tightly packed glyphs.
 ;Each glyph consists of 1bpp graphics data, organized as GlyphHeight lines of
-;GlyphWidth bytes in length. Pixels within a line are stored consecutively.
+;GlyphWidth bytes in length. Each 8 pixel column of graphics data is stored
+;consecutively.
+;
 ;For example, a font consisting of 16x16 glyphs will have a GlyphWidth of 2 and
 ;GlyphHeight of 16, and each glyph will occupy 32 bytes of memory. Whereas an
 ;8x8 font would instead have a GlyphWidth of 1 and GlyphHeight of 8, occupying
