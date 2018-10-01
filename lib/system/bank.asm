@@ -20,7 +20,7 @@ SECTION "PBase RST Bank Services 2", ROM0[$0008]
 ;Call code in another bank with restricted registers.
 ;Bank and pointer are encoded directly after the RST.
 ;Only BC and DE may be passed into and returned from far calls directly.
-;This saves 72 cycles over the regular FarCall routine.
+;This saves 88 cycles over the regular FarCall routine.
 System_FarCallRestricted::
     jp System_FarCallRestricted_int
 
@@ -29,13 +29,13 @@ SECTION "PBase RST Bank Services 3", ROM0[$0010]
 System_FarRead::
     jp System_FarRead_int
 
-SECTION "PBase RST Bank Services 3", ROM0[$0018]
+SECTION "PBase RST Bank Services 4", ROM0[$0018]
 ;Read two bytes from A:HL and store it in HL.
 ;Ideal for reading pointers in far memory.
 System_FarSnap::
     jp System_FarSnap_int
 
-SECTION "PBase RST Bank Services 4", ROM0[$0020]
+SECTION "PBase RST Bank Services 5", ROM0[$0020]
 ;Copy BC bytes from A:HL to DE.
 ;HL and DE will point to the end of their respective buffers.
 System_FarCopy::
@@ -52,8 +52,10 @@ System_BankInit::
 
 System_FarCall_int::
     ld [H_System_RegReserveA], a
-    ld [H_System_RegReserveH], h
-    ld [H_System_RegReserveL], l
+    ld a, h
+    ld [H_System_RegReserveH], a
+    ld a, l
+    ld [H_System_RegReserveL], a
     pop hl
     
     ;Switch banks
@@ -75,8 +77,10 @@ System_FarCall_int::
     
     ;Preserve A and HL for return.
     ld [H_System_RegReserveA], a
-    ld [H_System_RegReserveH], h
-    ld [H_System_RegReserveL], l
+    ld a, h
+    ld [H_System_RegReserveH], a
+    ld a, l
+    ld [H_System_RegReserveL], a
     
     pop af
     ld [H_System_CurBank], a
@@ -86,9 +90,9 @@ System_FarCall_int::
     inc hl
     inc hl
 .farjmp
-    jp [hl]
+    jp hl
 
-System_FarCallRestricted::
+System_FarCallRestricted_int::
     pop hl
     
     ;Switch banks
@@ -116,7 +120,7 @@ System_FarCallRestricted::
     inc hl
     inc hl
 .farjmp
-    jp [hl]
+    jp hl
 
 System_FarRead_int::
     ld [$2000], a
