@@ -5,9 +5,9 @@ M_LCDC_VallocBackingStoreBank EQU $4
 M_LCDC_VallocLocation EQU $5
 M_LCDC_VallocLocationBank EQU $7
 
-M_LCDC_VallocSize EQU $8
+M_LCDC_VallocStructSize EQU $8
 M_LCDC_VallocCount EQU $8
-M_LCDC_VallocArenaCount EQU M_LCDC_VallocSize * M_LCDC_VallocCount
+M_LCDC_VallocArenaCount EQU M_LCDC_VallocStructSize * M_LCDC_VallocCount
 
 M_LCDC_VallocStatusUndefined EQU $0 ;Entry not valid
 M_LCDC_VallocStatusFree EQU $1      ;VRAM not in use
