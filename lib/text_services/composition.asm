@@ -6,13 +6,36 @@ TextServices_GlyphCacheArea: ds 8
 SECTION "Text Services - Tile Composition", ROM0
 ;Cache an 8x8 section of a glyph into the GlyphCacheArea.
 ;Other routines are responsible for actually calculating glyph X/Y
-;to vertically align the glyph correctly. We only copy the data. To
-;only copy parts of a glyph, you will need to zero out the bits you
-;didn't want after the fact.
+;to vertically align the glyph correctly. We only copy the data.
 ;
-;   B = Number of lines per glyph column (stride)
+;   A = Cache mask configuration.
+;       
+;       Allows us to shift and mask the cache for when we need to draw less
+;       than a full tile.
+;       
+;       (Upper bits) How many lines down we start from.
+;                    
+;                    To be used in the case where we are drawing to the top of
+;                    a row which does not align to tile boundaries.
+;                    
+;                    Must not exceed 7. Default is 0.
+;                    
+;       (Lower bits) Number of lines to copy in total.
+;                    
+;                    To be used in the case where we are drawing to the bottom
+;                    of a row which does not align to tile boundaries.
+;                    
+;                    Must not contain a value which would cause us to write
+;                    outside of the cache area. The bound is equal to 8 minus
+;                    the upper value. Default is 8.
+;   B = Height of each glyph (aka stride)
 ;   D = Glyph X (bytes / 8 pixel units)
+;       
+;       How many tiles in the glyph to load from.
+;       
 ;   E = Glyph Y (lines / 1 pixel units)
+;       
+;       How many lines down in the glyph to load from.
 ;C:HL = Glyph far pointer
 ; 
 ; Returns HL = Near part of pointer to end of copied glyph segment.
@@ -22,6 +45,9 @@ SECTION "Text Services - Tile Composition", ROM0
 ; bytes max length for a single glyph. If you are making fonts this large there
 ; is probably something terribly wrong with what you are doing.
 TextServices_PrepareGlyphForComposition::
+    push af
+    push af
+    
     ld a, 0
 .x_stride_loop
     dec d
@@ -29,15 +55,31 @@ TextServices_PrepareGlyphForComposition::
     add a, b
     jr .x_stride_loop
     
-    inc d
+    inc d ;this will always be zero, because the above loop counted to $FF
     add a, e
     ld e, a
     add hl, de
-    ld a, c
     
-    ld bc, 8
+    pop af
+    and $70
+    swap
+    
     ld de, TextServices_GlyphCacheArea
+    or a
+    jr z, .no_line_offset
     
+    add a, e
+    ld e, a
+    jr nc, .no_line_offset
+    inc d
+    
+.no_line_offset
+    pop af
+    and $0F
+    ld b, a
+    ld a, c
+    ld c, b
+    ld b, 0
     M_System_FarCopy
     ret
 
