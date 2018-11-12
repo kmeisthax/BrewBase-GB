@@ -2,8 +2,8 @@
 M_TextServices_FontGlyphWidth EQU $0  ;How wide glyphs are, in bytes
 M_TextServices_FontGlyphHeight EQU $1 ;How tall glyphs are, in pixels
 M_TextServices_FontGlyphCount EQU $2  ;How many standalone glyphs there are.
-M_TextServices_FontGlyphData EQU $3   ;Where the font glyphs live in ROM.
-M_TextServices_FontMetricsData EQU $6 ;Where the font glyph metrics live in ROM.
+M_TextServices_FontGlyphData EQU $4   ;Where the font glyphs live in ROM.
+M_TextServices_FontMetricsData EQU $7 ;Where the font glyph metrics live in ROM.
 
 M_TextServices_FontSize EQU $9 ;Size of the font header structure.
 
@@ -42,9 +42,9 @@ M_TextServices_WindowCursorX EQU $4  ;X index of tile currently being drawn to.
 M_TextServices_WindowCursorY EQU $5  ;Y index of tile currently being drawn to.
 M_TextServices_WindowCursor EQU $6   ;Far pointer to current cursor tile.
 M_TextServices_WindowShiftX EQU $8   ;How many pixels into the current tile
-                                     ;we have already drawn
+                                     ;do we start drawing the next glyph
 M_TextServices_WindowShiftY EQU $9   ;How many lines down into the current tile
-                                     ;we have already drawn
+                                     ;do we start drawing the next glyph
 
 ;The Font is the set of glyphs used to draw text.
 M_TextServices_WindowFont EQU $A     ;Far pointer to font structure

@@ -78,9 +78,9 @@ TextServices_IncrementByTileRows:
     ret
 
 ;Index by a number of glyphs
-;A = Number of glyphs
 ;B = Glyph width / 8
 ;C = Glyph height
+;DE = Glyph index
 ;HL = Glyph base pointer
 ;Returns HL = Individual glyph pointer
 TextServices_IndexGlyphs:
@@ -99,16 +99,16 @@ TextServices_IndexGlyphs:
     jr .glyph_mul_loop
 
 .done_glyph_mul
-    ld d, h
-    ld e, l
+    ld b, h
+    ld c, l
     pop hl
+    pop de
     
 .index_mul_loop
-    dec a
+    dec de
     jr c, .done_index_mul
-    add hl, de
+    add hl, bc
     jr .index_mul_loop
     
 .done_index_mul
-    pop de
     ret
