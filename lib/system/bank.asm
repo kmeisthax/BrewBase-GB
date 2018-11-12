@@ -25,13 +25,13 @@ System_FarCallRestricted::
     jp System_FarCallRestricted_int
 
 SECTION "PBase RST Bank Services 3", ROM0[$0010]
-;Read one byte from A:HL and store it in A, incrementing HL along the way.
+;Read one byte from A:HL and store it in B, incrementing HL along the way.
 System_FarRead::
     jp System_FarRead_int
 
 SECTION "PBase RST Bank Services 4", ROM0[$0018]
-;Read two bytes from A:HL and store it in HL.
-;Ideal for reading pointers in far memory.
+;Read three bytes from A:HL and store it in A:HL.
+;Ideal for reading far pointers in far memory.
 System_FarSnap::
     jp System_FarSnap_int
 
@@ -126,17 +126,18 @@ System_FarRead_int::
     ld [$2000], a
     
     ld a, [hli]
-    push af
+    ld b, a
     
     ld a, [H_System_CurBank]
     ld [$2000], a
     
-    pop af
     ret
 
 System_FarSnap_int::
     ld [$2000], a
     
+    ld a, [hli]
+    ld [H_System_RegReserveA], a
     ld a, [hli]
     ld h, [hl]
     ld l, a
@@ -144,6 +145,7 @@ System_FarSnap_int::
     ld a, [H_System_CurBank]
     ld [$2000], a
     
+    ld a, [H_System_RegReserveA]
     ret
 
 System_FarCopy_int::
