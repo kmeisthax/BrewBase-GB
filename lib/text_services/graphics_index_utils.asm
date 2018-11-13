@@ -19,9 +19,9 @@ TextServices_GetWindowCursorTile:
     ld l, a
     
     pop af
-    call TextServices_IncrementLines
+    call TextServices_IncrementByTileRows
     ld a, b
-    call TextServices_IncrementTiles
+    call TextServices_IncrementByTiles
     
     pop de
     ret
@@ -83,7 +83,7 @@ TextServices_IncrementByTileRows:
 ;DE = Glyph index
 ;HL = Glyph base pointer
 ;Returns HL = Individual glyph pointer
-TextServices_IndexGlyphs:
+TextServices_IndexGlyphs::
     push de
     push hl
     

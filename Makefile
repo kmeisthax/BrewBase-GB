@@ -6,7 +6,7 @@
 
 #These tell Make where our files are.
 SRC_DIR := src
-LIB_DIR := lib/system lib/lcd_control
+LIB_DIR := lib/system lib/lcd_control lib/text_services
 BUILD_DIR := build
 TOOLS_DIR := tools
 

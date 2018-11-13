@@ -96,6 +96,7 @@ TextServices_PrepareGlyphForComposition::
     add a, b
     jr .x_stride_loop
     
+.done_x_stride_loop
     inc d ;this will always be zero, because the above loop counted to $FF
     add a, e
     ld e, a
@@ -103,7 +104,7 @@ TextServices_PrepareGlyphForComposition::
     
     pop af
     and $70
-    swap
+    swap a
     
     ld de, TextServices_GlyphCacheArea
     or a
@@ -132,7 +133,7 @@ TextServices_PrepareGlyphForComposition::
 ; E = Compose color
 ;       (what 2bpp color should a 1 bit map to?)
 ;HL = Near pointer to window tile to overwrite
-TextServices_ComposeGlyphWithTile:
+TextServices_ComposeGlyphWithTile::
     push af
     push bc
     

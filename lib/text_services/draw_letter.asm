@@ -119,7 +119,7 @@ TextServices_DrawGlyphToWindow::
     jr z, .no_horizontal_glyph_overhang
     
 .has_horizontal_glyph_overhang
-    cpl a
+    cpl
     inc a
     and $07
     ld d, a
@@ -203,7 +203,7 @@ TextServices_DrawGlyphToWindow::
     ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphHeight]
     add a, c
     cp b
-    jr nc, .row_loop
+    jp nc, .row_loop
     
     pop de
     pop af
