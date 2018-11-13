@@ -4,6 +4,47 @@ SECTION "Text Services - Tile Composition Memory", WRAM0
 TextServices_GlyphCacheArea: ds 8
 
 SECTION "Text Services - Tile Composition", ROM0
+;Calculate the vertical shifting parameters for PrepareGlyphForComposition.
+;
+;NOTE: This does not consider glyph or window metrics such as baseline. Make
+;sure to adjust Cursor Y for baseline before computing the shift parameter.
+;   
+;   B = Top Edge of Glyph (Cursor Y at start of drawing)
+;   C = Glyph Height
+;   D = Current Window Cursor Y (Cursor Y at start, current tile Y after)
+; Returns
+;   A = Cache mask configuration
+;       (hi nybble: Vertical line shift count)
+;       (lo nybble: Line copy count)
+;   B = Vertical copy start position (relative to glyph)
+TextServices_ComputeVerticalShiftingParameters::
+    ld a, c
+    sub b
+    push af ;Store the vertical copy start position
+    
+    xor a
+    add a, b
+    add a, c
+    sub a, d
+    cp 8
+    jr nc, .no_max_8
+    
+.max_8
+    ld a, 8
+    
+.no_max_8
+    push af ;Store the maximum tile line count as bounded by the bottom edge.
+    
+    ld a, d
+    and $07
+    swap a
+    pop bc
+    or a, b
+    
+    pop bc
+    
+    ret
+
 ;Cache an 8x8 section of a glyph into the GlyphCacheArea.
 ;Other routines are responsible for actually calculating glyph X/Y
 ;to vertically align the glyph correctly. We only copy the data.
