@@ -10,6 +10,9 @@ SECTION "NDMA Requests", ROM0
 ;executed first thing as part of the VBlank IRQ. Care is taken within the
 ;routine to avoid exhausting VBlank time entirely, transfers are capped to 6kb
 ;total.
+;
+;This routine clobbers REG_VBK, we assume all VRAM access will occur using this
+;routine. If not the case, you will need to use another routine.
 LCDC_ResolvePendingNDMA::
     ld a, [W_System_ARegStartup]
     cp M_BIOS_CPU_CGB
