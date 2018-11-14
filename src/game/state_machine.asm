@@ -13,6 +13,7 @@ SECTION "Root State Machine", ROM0
 ;Individual states are free to implement their own state tables; the memory
 ;location System_StateMachine_MainSubState is provided for such use.
 Game_StateMachineTable:
+    dw Game_StateLoadScreen
 Game_StateMachineTableEND
 
 Game_StateMachineTableLENGTH EQU (Game_StateMachineTableEND - Game_StateMachineTable) / 2
@@ -22,7 +23,7 @@ Game_StateMachineTableLENGTH EQU (Game_StateMachineTableEND - Game_StateMachineT
 Game_StateMachine::
     ld a, [W_Game_StateMachineState]
     cp Game_StateMachineTableLENGTH
-    jr c, .invalidState
+    jr nc, .invalidState
     
     ld hl, Game_StateMachineTable
     call System_StateMachineLookupJump
@@ -32,3 +33,32 @@ Game_StateMachine::
     ret
 
 ;Game states follow
+Game_StateLoadScreen::
+    ld a, 9
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocSize], a
+    
+    ld a, TestGraphic & $FF
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocBackingStore], a
+    
+    ld a, TestGraphic >> 8
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocBackingStore + 1], a
+    
+    ld a, BANK(TestGraphic)
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocBackingStoreBank], a
+    
+    ld a, $00
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocLocation], a
+    
+    ld a, $90
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocLocation + 1], a
+    
+    ld a, 0
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocLocationBank], a
+    
+    ld a, M_LCDC_VallocStatusDirty
+    ld [W_LCDC_VallocArena + M_LCDC_VallocStructSize + 0 + M_LCDC_VallocStatus], a
+    
+    ld a, 1
+    ld [W_Game_StateMachineState], a
+    
+    ret
