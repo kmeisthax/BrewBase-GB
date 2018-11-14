@@ -84,7 +84,7 @@ LCDC_ResolvePendingNDMA::
     jr z, .exitDMAProcessing
     
     ld a, l
-    add M_LCDC_VallocSize
+    add (M_LCDC_VallocStructSize - M_LCDC_VallocSize)
     ld l, a
     jr nc, .processEntry
     inc h
