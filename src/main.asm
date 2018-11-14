@@ -7,7 +7,13 @@ SECTION "Main", ROM0
 main::
     call System_DetectGatherStartup
     call System_BankInit
+    call System_MemoryInit
+    
+    ld hl, $CFFF
+    ld sp, hl
+    
     call LCDC_VBlankInit
+    ei
     
     ;Executed once per frame.
     ;Place code here that needs to run once per frame in non-interrupt context.
@@ -21,6 +27,7 @@ main::
     ;Stop processing until we get a Vblank interrupt.
 .interruptFilter
     halt
+    nop
     
     ld a, [W_LCDC_VBlankExecuted]
     cp 1
