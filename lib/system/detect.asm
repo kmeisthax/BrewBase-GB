@@ -1,4 +1,4 @@
-SECTION "BBase Hardware Detect Memory", HRAM
+SECTION "BBase Hardware Detect Memory", HRAM[$FF80]
 W_System_ARegStartup:: ds 1
 W_System_BRegStartup:: ds 1
 W_System_SGBPresent:: ds 1

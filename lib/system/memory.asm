@@ -1,6 +1,21 @@
 INCLUDE "lib/brewbase.inc"
 
 SECTION "System Memory Init", ROM0
+;Clear system HRAM.
+;
+;This routine takes care to avoid overwriting saved hardware detect info, but
+;will wipe everything else.
+;
+;NOTE: This does not follow standard callee-cleanup procedures since it's an
+;init utility.
+;
+;WARN: Do not call this routine while SP is in HRAM or you will crash the game.
+System_HiMemoryInit::
+    ld hl, W_System_SGBPresent
+    ld de, ($FFFE - W_System_SGBPresent)
+    call System_Memclear
+    ret
+
 ;Clear system WRAM.
 ;
 ;NOTE: This does not follow standard callee-cleanup procedures since it's an

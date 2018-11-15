@@ -6,12 +6,12 @@ SECTION "Main", ROM0
 ;The first instruction must be present for valid hardware autodetection.
 main::
     call System_DetectGatherStartup
-    call System_BankInit
     call System_MemoryInit
     
     ld hl, $CFFF
     ld sp, hl
-    
+    call System_HiMemoryInit
+    call System_BankInit
     call LCDC_VBlankInit
     ei
     
