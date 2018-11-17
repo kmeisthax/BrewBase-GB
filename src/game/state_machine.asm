@@ -53,48 +53,21 @@ Game_StateLoadScreen::
     
 Game_StateDrawText::
     ld hl, W_Game_Window
+    ld d, 8
+    ld e, 2
+    ld b, 8
+    ld c, 6
+    call TextServices_SetWindowSize
     
-    ld a, 8
-    ld [hli], a ;Width 8 tiles
-    
-    ld a, 2
-    ld [hli], a ;Height 2 tiles
-    
-    ld a, 8
-    ld [hli], a ;Row height 8 pixels
-    
-    ld a, 6
-    ld [hli], a ;Baseline at 6 pixels from top
-    
-    xor a
-    ld [hli], a ;Cursor X
-    ld [hli], a ;Cursor Y
-    
-    ld de, W_Game_Window
-    ld a, e
-    ld [hli], a
-    ld a, d
-    ld [hli], a ;Cursor pointer
-    
-    xor a
-    ld [hli], a ;Cursor shift X
-    ld [hli], a ;Cursor shift Y
-    
+    ld hl, W_Game_Window
     ld a, BANK(Game_Font)
-    ld [hli], a
-    ld de, Game_Font
-    ld a, e
-    ld [hli], a
-    ld a, d
-    ld [hli], a ;Font far pointer
+    ld bc, Game_Font
+    call TextServices_SetWindowFont
     
-    ld a, 0
-    ld [hli], a
-    ld de, W_Game_WindowBuffer
-    ld a, e
-    ld [hli], a
-    ld a, d
-    ld [hli], a ;Backing far pointer
+    ld hl, W_Game_Window
+    ld a, BANK(W_Game_WindowBuffer)
+    ld bc, W_Game_WindowBuffer
+    call TextServices_SetWindowBacking
     
     ld bc, $41
     ld hl, W_Game_Window
