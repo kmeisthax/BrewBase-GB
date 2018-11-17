@@ -165,18 +165,20 @@ TextServices_ComposeGlyphWithTile::
     jr nz, .negative_shift
     
 .positive_shift_loop
-    sra a
+    srl a
     dec d
     jr nz, .positive_shift_loop
     jr .recolor_1bpp_graphics
     
 .negative_shift
+    push af
     xor a
     sub a, d
     ld d, a
+    pop af
     
 .negative_shift_loop
-    sra a
+    sla a
     dec d
     jr nz, .negative_shift_loop
     

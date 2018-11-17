@@ -93,7 +93,7 @@ TextServices_DrawGlyphToWindow::
     
     pop de
     push de
-    ld hl, M_TextServices_WindowCursorX
+    ld hl, M_TextServices_WindowCursorY
     add hl, de
     ld a, [hl]
     sla a
@@ -101,11 +101,18 @@ TextServices_DrawGlyphToWindow::
     sla a
     
     pop de
-    ld hl, M_TextServices_WindowShiftX
+    push de
+    ld hl, M_TextServices_WindowShiftY
     add hl, de
     or [hl]
     ld [W_TextServices_StartingVerticalCursor], a
     ld [W_TextServices_CurrentVerticalCursor], a
+    
+    pop de
+    ld hl, M_TextServices_WindowShiftX
+    add hl, de
+    ld a, [hl]
+    ld [W_TextServices_CurrentHorizontalShift], a
     
 .row_loop
     ld a, [W_TextServices_StartingVerticalCursor]
@@ -129,9 +136,11 @@ TextServices_DrawGlyphToWindow::
     jr z, .no_horizontal_glyph_overhang
     
 .has_horizontal_glyph_overhang
+    ld d, a
+    ld a, 8
+    sub a, d
     cpl
     inc a
-    and $07
     ld d, a
     ld e, 3 ;TODO: Pull the text window color
     
@@ -181,6 +190,11 @@ TextServices_DrawGlyphToWindow::
     ld h, a
     
     call TextServices_ComposeGlyphWithTile
+    
+    ld a, l
+    ld [W_TextServices_CurrentWindowBacking + 1], a
+    ld a, h
+    ld [W_TextServices_CurrentWindowBacking + 2], a
     jr .tile_loop
     
 .exit_tile_loop

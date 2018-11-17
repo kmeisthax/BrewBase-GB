@@ -70,7 +70,7 @@ Game_StateDrawText::
     call TextServices_SetWindowBacking
     
     ld hl, W_Game_Window
-    ld b, 3
+    ld b, 5
     ld c, 3
     call TextServices_SetWindowCursorPosition
     
