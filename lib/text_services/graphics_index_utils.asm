@@ -30,19 +30,19 @@ TextServices_GetWindowCursorTile:
 ;A = Number of tiles
 ;HL = Current tile pointer
 ;Returns HL = New tile pointer
-TextServices_IncrementByTiles:
+TextServices_IncrementByTiles::
     push de
     
-    ld e, 0
+    ld d, 0
     sla a
-    rl e
+    rl d
     sla a
-    rl e
+    rl d
     sla a
-    rl e
+    rl d
     sla a
-    rl e
-    ld d, a
+    rl d
+    ld e, a
     add hl, de
     
     pop de

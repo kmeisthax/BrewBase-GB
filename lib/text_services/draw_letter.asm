@@ -109,6 +109,7 @@ TextServices_DrawGlyphToWindow::
     ld [W_TextServices_CurrentVerticalCursor], a
     
     pop de
+    push de
     ld hl, M_TextServices_WindowShiftX
     add hl, de
     ld a, [hl]
@@ -225,9 +226,36 @@ TextServices_DrawGlyphToWindow::
     add a, c
     cp b
     jp z, .exit
-    jp nc, .row_loop
+    jp c, .exit
+    
+.goto_next_row
+    pop de
+    push de
+    ld hl, M_TextServices_WindowWidth
+    add hl, de
+    ld b, [hl]
+    
+    pop de
+    push de
+    ld hl, M_TextServices_WindowBacking
+    add hl, de
+    ld a, [hli]
+    ld [W_TextServices_CurrentWindowBacking], a
+    ld a, [hli]
+    ld h, [hl]
+    ld l, a
+    ld a, b
+    call TextServices_IncrementByTiles
+    
+    ld a, l
+    ld [W_TextServices_CurrentWindowBacking + 1], a
+    ld a, h
+    ld [W_TextServices_CurrentWindowBacking + 2], a
+    
+    jp .row_loop
     
 .exit
+    pop de
     pop de
     pop af
     ret
