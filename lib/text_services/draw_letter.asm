@@ -92,9 +92,18 @@ TextServices_DrawGlyphToWindow::
     ld [W_TextServices_CurrentWindowBacking + 2], a
     
     pop de
+    push de
     ld hl, M_TextServices_WindowCursorX
     add hl, de
     ld a, [hl]
+    sla a
+    sla a
+    sla a
+    
+    pop de
+    ld hl, M_TextServices_WindowShiftX
+    add hl, de
+    or [hl]
     ld [W_TextServices_StartingVerticalCursor], a
     ld [W_TextServices_CurrentVerticalCursor], a
     

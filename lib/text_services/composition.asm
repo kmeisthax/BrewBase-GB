@@ -9,9 +9,9 @@ SECTION "Text Services - Tile Composition", ROM0
 ;NOTE: This does not consider glyph or window metrics such as baseline. Make
 ;sure to adjust Cursor Y for baseline before computing the shift parameter.
 ;   
-;   B = Top Edge of Glyph (Cursor Y at start of drawing)
+;   B = Top Edge of Glyph (Cursor Y at start of drawing, pixels)
 ;   C = Glyph Height
-;   D = Current Window Cursor Y (Cursor Y at start, current tile Y after)
+;   D = Current Window Cursor Y (Cursor Y at start, current tile Y after, pixels)
 ; Returns
 ;   A = Cache mask configuration
 ;       (hi nybble: Vertical line shift count)
@@ -22,23 +22,32 @@ TextServices_ComputeVerticalShiftingParameters::
     sub b
     push af ;Store the vertical copy start position
     
-    xor a
-    add a, b
-    add a, c
-    sub a, d
-    cp 8
-    jr nc, .no_max_8
+    ;Compute how many lines remain in the glyph if we copy from that point
+    ld b, a
+    ld a, c
+    sub a, b
+    ld c, a
     
-.max_8
-    ld a, 8
-    
-.no_max_8
-    push af ;Store the maximum tile line count as bounded by the bottom edge.
-    
+    ;Compute the starting line
     ld a, d
     and $07
-    swap a
+    push af
+    
+    ;Compute the maximum number of remaining lines
+    ld d, a
+    ld a, 8
+    sub a, d
+    
+    cp c
+    jr nc, .glyph_too_short
+    jr .compose_cache_mask
+    
+.glyph_too_short
+    ld a, c
+    
+.compose_cache_mask
     pop bc
+    swap b
     or a, b
     
     pop bc

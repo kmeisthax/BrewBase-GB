@@ -69,6 +69,11 @@ Game_StateDrawText::
     ld bc, W_Game_WindowBuffer
     call TextServices_SetWindowBacking
     
+    ld hl, W_Game_Window
+    ld b, 3
+    ld c, 3
+    call TextServices_SetWindowCursorPosition
+    
     ld bc, $41
     ld hl, W_Game_Window
     call TextServices_DrawGlyphToWindow

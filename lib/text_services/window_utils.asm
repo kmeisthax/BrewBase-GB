@@ -78,6 +78,40 @@ TextServices_SetWindowBacking::
 
 ;Position a window's text cursor.
 ;
-; B = Cursor X position
-; C = Cursor Y position
+; B = Cursor X position in pixels
+; C = Cursor Y position in pixels
 ; HL = Near pointer to window structure
+TextServices_SetWindowCursorPosition::
+    push af
+    push de
+    
+    ld de, M_TextServices_WindowCursorX
+    add hl, de
+    
+    ld a, b
+    srl a
+    srl a
+    srl a
+    ld [hli], a
+    
+    ld a, c
+    srl a
+    srl a
+    srl a
+    ld [hli], a
+    
+    ;TODO: Something with the cursor?
+    inc hl
+    inc hl
+    
+    ld a, b
+    and $07
+    ld [hli], a
+    
+    ld a, c
+    and $07
+    ld [hli], a
+    
+    pop de
+    pop af
+    ret
