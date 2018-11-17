@@ -54,6 +54,7 @@ TextServices_IncrementByTiles:
 ;HL = Current tile pointer
 ;Returns HL = New tile pointer
 TextServices_IncrementByTileRows:
+    push af
     push de
     
     ld e, 0
@@ -67,14 +68,17 @@ TextServices_IncrementByTileRows:
     rl e
     ld d, a
     
+    ld a, c
 .y_mul_loop
-    dec c
-    jr c, .done_y_mul
+    cp 0
+    jr z, .done_y_mul
+    dec a
     add hl, de
     jr .y_mul_loop
     
 .done_y_mul
     pop de
+    pop af
     ret
 
 ;Index by a number of glyphs
@@ -83,32 +87,45 @@ TextServices_IncrementByTileRows:
 ;DE = Glyph index
 ;HL = Glyph base pointer
 ;Returns HL = Individual glyph pointer
+;TODO: This returns an offset, not a pointer.
+;TODO: The glyph value will almost always be larger than the tile size, can we
+;      reverse the order of multiplication for a speedup?
 TextServices_IndexGlyphs::
-    push de
+    push af
     push hl
+    push de
     
     ld h, 0
     ld l, 0
     ld d, 0
     ld e, c
     
+    ld a, b
 .glyph_mul_loop
-    dec b
-    jr c, .done_glyph_mul
+    cp 0
+    jr z, .done_glyph_mul
+    dec a
     add hl, de
     jr .glyph_mul_loop
 
 .done_glyph_mul
-    ld b, h
-    ld c, l
-    pop hl
-    pop de
+    ld d, h
+    ld e, l
+    ld hl, 0
+    pop bc ;RENAMED: Glyph Index
     
 .index_mul_loop
+    xor a
+    or a, d
+    or a, e
+    jr z, .add_base_offset
     dec de
-    jr c, .done_index_mul
     add hl, bc
     jr .index_mul_loop
     
-.done_index_mul
+.add_base_offset
+    pop bc ;RENAMED: Base pointer
+    add hl, bc
+    
+    pop af
     ret

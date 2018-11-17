@@ -52,10 +52,58 @@ Game_StateLoadScreen::
     ret
     
 Game_StateDrawText::
-    ld hl, $9100
-    push hl
+    ld hl, W_Game_Window
+    
+    ld a, 8
+    ld [hli], a ;Width 8 tiles
+    
+    ld a, 2
+    ld [hli], a ;Height 2 tiles
+    
+    ld a, 8
+    ld [hli], a ;Row height 8 pixels
+    
+    ld a, 6
+    ld [hli], a ;Baseline at 6 pixels from top
+    
+    xor a
+    ld [hli], a ;Cursor X
+    ld [hli], a ;Cursor Y
+    
+    ld de, W_Game_Window
+    ld a, e
+    ld [hli], a
+    ld a, d
+    ld [hli], a ;Cursor pointer
+    
+    xor a
+    ld [hli], a ;Cursor shift X
+    ld [hli], a ;Cursor shift Y
+    
+    ld a, BANK(Game_Font)
+    ld [hli], a
+    ld de, Game_Font
+    ld a, e
+    ld [hli], a
+    ld a, d
+    ld [hli], a ;Font far pointer
+    
+    ld a, 0
+    ld [hli], a
+    ld de, W_Game_WindowBuffer
+    ld a, e
+    ld [hli], a
+    ld a, d
+    ld [hli], a ;Backing far pointer
+    
+    ld bc, $41
+    ld hl, W_Game_Window
+    call TextServices_DrawGlyphToWindow
+    
     ld a, 0
     push af
+    ld hl, $9100
+    push hl
     ld a, 1
     ld e, 9
     ld bc, W_Game_WindowBuffer

@@ -60,6 +60,8 @@ TextServices_DrawGlyphToWindow::
     ld bc, 0
     
 .bounds_check_pass
+    ld d, b
+    ld e, c
     ld hl, W_TextServices_FontHeaderCache + M_TextServices_FontGlyphWidth
     ld a, [hli]
     ld b, a
@@ -110,10 +112,9 @@ TextServices_DrawGlyphToWindow::
     
     xor a
     ld [W_TextServices_CurrentHorizontalTile], a
+    jr .first_horizontal_tile
     
 .tile_loop
-    cp 0
-    jr z, .no_horizontal_glyph_overhang
     ld a, [W_TextServices_CurrentHorizontalShift]
     cp 0
     jr z, .no_horizontal_glyph_overhang
@@ -134,13 +135,14 @@ TextServices_DrawGlyphToWindow::
     call TextServices_ComposeGlyphWithTile
     
 .no_horizontal_glyph_overhang
-    ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphWidth]
-    ld b, a
-    
     ld a, [W_TextServices_CurrentHorizontalTile]
     inc a
     ld [W_TextServices_CurrentHorizontalTile], a
     
+.first_horizontal_tile
+    ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphWidth]
+    ld b, a
+    ld a, [W_TextServices_CurrentHorizontalTile]
     cp b
     jr z, .exit_tile_loop
     
@@ -149,7 +151,6 @@ TextServices_DrawGlyphToWindow::
     ld a, [W_TextServices_CurrentGlyphBase]
     ld c, a
     ld a, [W_TextServices_CurrentHorizontalTile]
-    dec a
     ld d, a
     ld a, [W_TextServices_CurrentVerticalGlyphPosition]
     ld e, a
@@ -158,7 +159,6 @@ TextServices_DrawGlyphToWindow::
     ld a, [W_TextServices_CurrentGlyphBase + 2]
     ld h, a
     ld a, [W_TextServices_CurrentCacheMask]
-    
     call TextServices_PrepareGlyphForComposition
     
     ld a, [W_TextServices_CurrentHorizontalShift]
@@ -172,8 +172,6 @@ TextServices_DrawGlyphToWindow::
     ld h, a
     
     call TextServices_ComposeGlyphWithTile
-    
-    ld a, [W_TextServices_CurrentHorizontalTile]
     jr .tile_loop
     
 .exit_tile_loop
@@ -203,8 +201,10 @@ TextServices_DrawGlyphToWindow::
     ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphHeight]
     add a, c
     cp b
+    jp z, .exit
     jp nc, .row_loop
     
+.exit
     pop de
     pop af
     ret

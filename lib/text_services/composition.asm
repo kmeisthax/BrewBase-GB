@@ -18,7 +18,7 @@ SECTION "Text Services - Tile Composition", ROM0
 ;       (lo nybble: Line copy count)
 ;   B = Vertical copy start position (relative to glyph)
 TextServices_ComputeVerticalShiftingParameters::
-    ld a, c
+    ld a, d
     sub b
     push af ;Store the vertical copy start position
     
@@ -140,22 +140,26 @@ TextServices_ComposeGlyphWithTile::
     ld bc, TextServices_GlyphCacheArea
     
     ld a, 8
-    push af
-    
 .compose_loop
+    push af
     push de
     
     ld a, [bc]
     inc bc
     
+    ;TODO: Find a better way to test for zero without clobbering all our shit
+    dec d
+    inc d
+    jr z, .recolor_1bpp_graphics
+    
     bit 7, d
     jr nz, .negative_shift
     
 .positive_shift_loop
-    dec d
-    jr c, .recolor_1bpp_graphics
     sra a
-    jr .positive_shift_loop
+    dec d
+    jr nz, .positive_shift_loop
+    jr .recolor_1bpp_graphics
     
 .negative_shift
     xor a
@@ -163,10 +167,9 @@ TextServices_ComposeGlyphWithTile::
     ld d, a
     
 .negative_shift_loop
-    dec d
-    jr c, .recolor_1bpp_graphics
     sra a
-    jr .negative_shift_loop
+    dec d
+    jr nz, .negative_shift_loop
     
 .recolor_1bpp_graphics
     push af

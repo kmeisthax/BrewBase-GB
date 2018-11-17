@@ -156,6 +156,9 @@ System_FarCopy_int::
     ld [de], a
     inc de
     dec bc
+    xor a
+    or a, b
+    or a, c
     jp nz, .copy_loop
     
     ld a, [H_System_CurBank]
