@@ -1,48 +1,54 @@
 INCLUDE "lib/brewbase.inc"
 
+SECTION "NDMA Request State", WRAM0
+W_LCDC_CurrentVallocEntryIndex:: ds 1
+W_LCDC_CurrentVallocEntry:: ds M_LCDC_VallocStructSize
+
 SECTION "NDMA Requests", ROM0
-;Resolve pending NDMA requests, if any.
+;Execute the NDMA request in CurrentVallocEntry.
 ;
-;Requests are resolved from the top of the arena to the bottom.
+;This function uses NDMA and is intended for use during Vblank. Attempts to
+;execute NDMA transfers outside of Vblank (or screen off) will fail to actually
+;transfer data to VRAM.
 ;
-;NDMA requests handled here will be resolved as general-purpose DMA; this 
-;routine is thus unsuitable for use outside of V-blank. Ideally, it should be
-;executed first thing as part of the VBlank IRQ. Care is taken within the
-;routine to avoid exhausting VBlank time entirely, transfers are capped to 6kb
-;total.
+;This routine is aware of Vblank timing and will shorten transfers to remain
+;within a given transfer limit. Repeated invocation of this function during
+;successive Vblank interrupts will eventually result in a completed transfer.
 ;
-;This routine clobbers REG_VBK, we assume all VRAM access will occur using this
-;routine. If not the case, you will need to use another routine.
-LCDC_ResolvePendingNDMA::
-    ld a, [W_System_ARegStartup]
-    cp M_BIOS_CPU_CGB
-    jr nz, LCDC_EmulatePendingNDMA
-    
-    ld d, 0     ;current arena entry
-    ld bc, M_LCDC_NDMARequestProcessingCap    ;total processing time remaining
-    ld hl, W_LCDC_VallocArena
-    
-.processEntry
-    ld a, [hl]
-    cp M_LCDC_VallocStatusDirty
-    jr nz, .skipDMAEntry
-    
+;A = Estimated remaining vblank time (in tiles)
+;    This parameter specifies how much NDMA time remains; it is used to cap the
+;    transfer length of the current Valloc entry.
+;
+;[CurrentVallocEntry] = A Valloc structure, presumably marked dirty, to
+;                       transfer into VRAM.
+;
+;RETURNS
+;
+;A = Estimated remaining vblank time (in tiles) subtracting current transfer
+;    length
+;
+;[CurrentVallocEntry.Status] = Clean if finished completely, Dirty if ongoing.
+;[CurrentVallocEntry.Size] = 0 if finished completely, otherwise ongoing.
+;[CurrentVallocEntry.BackingStore] = If not finished completely, points to the
+;and [CurrentVallocEntry.Location]   remaining portion of the transfer.
+LCDC_ExecuteCurrentNDMAEntry::
+    push bc
     push hl
-    inc hl
-    push hl
     
-    ;Check if servicing this request would exceed the NDMA cap
+    ld hl, W_LCDC_CurrentVallocEntry + M_LCDC_VallocSize
     ld a, [hli]
-    cp c
-    jr c, .timeRemains
+    inc a ;For some reason we store Valloc size as bias -1, which means we have
+          ;to unbias it for maths
     
-.checkUpperBits
+    cp b
+    jr c, .no_cap_transfer_rate
+
+.cap_transfer_rate
     ld a, b
-    and a
-    jr z, .exitDMAProcessingFromStack
     
-    ;At this point we're ready to start talking to the NDMA hardware...
-.timeRemains
+.no_cap_transfer_rate
+    ld c, a
+    
     ld a, [hli]
     ld [REG_HDMA2], a   ;For some reason the NDMA hardware is big endian!?
     
@@ -65,31 +71,124 @@ LCDC_ResolvePendingNDMA::
     ld a, [hli]
     ld [REG_VBK], a
     
-    pop hl
-    ld a, [hld]
+    ld a, c
+    dec a
     and $7F
     ld [REG_HDMA5], a   ;Trigger the actual NDMA transfer
     
-    ;Subtract from our processing cap.
-    cpl
-    inc a
-    add c
-    jr nc, .noSubCarry
+    ;At this point, we need to update the entry
+    ld hl, W_LCDC_CurrentVallocEntry + M_LCDC_VallocSize
+    sub [hl]
+    jp z, .transfer_complete
     
-.subCarry
-    dec b
+.transfer_ongoing
+    ld [hli], a
     
-.noSubCarry
+    push bc
+    
+    and $F0
+    swap a
+    ld b, a
+    ld a, c
+    and $0F
+    swap a
     ld c, a
     
-    ;Mark the transfer as completed.
-    pop hl
+    ld a, [hl]
+    add a, c
+    ld [hli], a
+    ld a, [hl]
+    adc a, b
+    ld [hli], a
+    
+    pop bc
+    jr .report_time_utilization
+    
+.transfer_complete
+    ld [hld], a
     ld a, M_LCDC_VallocStatusClean
     ld [hl], a
     
+.report_time_utilization
+    ;B = how much time we started with
+    ;C = how much time we took
+    ld a, b
+    sub a, c
+    
+    pop hl
+    pop bc
+    ret
+
+;Resolve pending NDMA requests, if any.
+;
+;Requests are resolved from the top of the arena to the bottom.
+;
+;NDMA requests handled here will be resolved as general-purpose DMA; this 
+;routine is thus unsuitable for use outside of V-blank. Ideally, it should be
+;executed first thing as part of the VBlank IRQ. Care is taken within the
+;routine to avoid exhausting VBlank time entirely; transfer speed is throttled
+;to a rate of 4kb/frame. This should be plenty for everything but 60fps full
+;motion video (and, tbh, you can get up to 7kb/frame by using HDMA)
+;
+;NOTE: This routine does not respect callee cleanup conventions. You will need
+;to push all registers beforehand.
+;
+;This routine clobbers REG_VBK, we assume all VRAM access will occur using this
+;routine. If not the case, you will need to use another routine.
+LCDC_ResolvePendingNDMA::
+    ld a, [W_System_ARegStartup]
+    cp M_BIOS_CPU_CGB
+    jr nz, LCDC_EmulatePendingNDMA
+    
+    ld c, 0     ;current arena entry
+    ld b, M_LCDC_NDMARequestProcessingCap ;total processing time remaining
+    ld hl, W_LCDC_VallocArena
+    
+.processEntry
+    ld a, [hl]
+    cp M_LCDC_VallocStatusDirty
+    jr nz, .skipDMAEntry
+    
+    ld a, c
+    ld [W_LCDC_CurrentVallocEntryIndex], a
+    
+    ld de, W_LCDC_CurrentVallocEntry
+    
+    REPT M_LCDC_VallocStructSize
+    ld a, [hli]
+    ld [de], a
+    inc de
+    ENDR
+    
+    ld a, b
+    call LCDC_ExecuteCurrentNDMAEntry
+    ld b, a
+    
+    ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
+    cp M_LCDC_VallocStatusClean
+    jr nz, .exitDMAProcessing
+    
+    ;Copy back the old status
+    ld de, (M_LCDC_VallocStructSize * -1)
+    add hl, de
+    ld [hl], a
+    
+    ld de, M_LCDC_VallocStructSize
+    add hl, de
+    
+    ld a, b
+    cp 0
+    jr z, .exitDMAProcessing
+    
+    inc c
+    ld a, c
+    cp M_LCDC_VallocCount
+    jr z, .exitDMAProcessing
+    jr .processEntry
+    
 .skipDMAEntry
-    inc d
-    ld a, d
+    inc c
+    ld a, c
     cp M_LCDC_VallocCount
     jr z, .exitDMAProcessing
     
@@ -99,9 +198,6 @@ LCDC_ResolvePendingNDMA::
     jr nc, .processEntry
     inc h
     jr .processEntry
-    
-.exitDMAProcessingFromStack
-    add sp, 4
     
 .exitDMAProcessing
     ;Unclobber banks. TODO: What of REG_VBK?
@@ -121,7 +217,7 @@ LCDC_ResolvePendingNDMA::
 ;processed at all.
 LCDC_EmulatePendingNDMA::
     ld d, 0     ;current arena entry
-    ld bc, M_LCDC_NDMARequestEmulatedProcessingCap    ;total processing time remaining
+    ld c, M_LCDC_NDMARequestEmulatedProcessingCap    ;total processing time remaining
     ld hl, W_LCDC_VallocArena
     
 .processEntry
@@ -136,14 +232,10 @@ LCDC_EmulatePendingNDMA::
     ;Check if servicing this request would exceed the NDMA cap
     ld a, [hli]
     cp c
-    jr c, .timeRemains
-    
-.checkUpperBits
-    ld a, b
-    and a
-    jr z, .exitDMAProcessingFromStack
+    jr nc, .exitDMAProcessingFromStack
     
     ;At this point we're ready to start talking to the NDMA hardware...
+    ;oh wait no lets emulate it instead
 .timeRemains
     inc hl
     inc hl
@@ -165,9 +257,9 @@ LCDC_EmulatePendingNDMA::
     
     pop hl
     ld a, [hli]
-    push af
     ld b, a
     inc b
+    push bc
     
     ld a, [hli]
     ld h, [hl]
@@ -189,12 +281,6 @@ LCDC_EmulatePendingNDMA::
     cpl
     inc a
     add c
-    jr nc, .noSubCarry
-    
-.subCarry
-    dec b
-    
-.noSubCarry
     ld c, a
     
 .transfer_complete

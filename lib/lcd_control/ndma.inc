@@ -1,2 +1,2 @@
-M_LCDC_NDMARequestProcessingCap EQU $180
-M_LCDC_NDMARequestEmulatedProcessingCap EQU $16
+M_LCDC_NDMARequestProcessingCap EQU $FF
+M_LCDC_NDMARequestEmulatedProcessingCap EQU $8

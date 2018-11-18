@@ -11,4 +11,5 @@ M_LCDC_VallocArenaCount EQU M_LCDC_VallocStructSize * M_LCDC_VallocCount
 
 M_LCDC_VallocStatusUndefined EQU $0 ;Entry not valid
 M_LCDC_VallocStatusDirty EQU $1     ;VRAM & backing store in use, needs copying
-M_LCDC_VallocStatusClean EQU $2     ;VRAM & backing store in use and matching
+M_LCDC_VallocStatusProcessing EQU $2     ;VRAM & backing store in use, needed copy in progress
+M_LCDC_VallocStatusClean EQU $3     ;VRAM & backing store in use, matches
