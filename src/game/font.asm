@@ -2,7 +2,7 @@ INCLUDE "lib/brewbase.inc"
 
 SECTION "Font", ROMX, BANK[2]
 Game_Font::
-    db 1, 8
+    db 1, 16
     dw ((Game_FontGlyphs_END - Game_FontGlyphs) / 8)
     db BANK(Game_FontGlyphs)
     dw Game_FontGlyphs
@@ -11,7 +11,7 @@ Game_Font::
     dw $4000
     
 Game_FontGlyphs::
-    INCBIN "build/src/game/font.1bpp"
+    INCBIN "build/src/game/8bitoperator.1bpp"
 Game_FontGlyphs_END
 
 SECTION "Window", WRAM0[$C200]
