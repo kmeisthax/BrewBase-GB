@@ -119,10 +119,18 @@ TextServices_PrepareGlyphForComposition::
     or a
     jr z, .no_line_offset
     
-    add a, e
-    ld e, a
-    jr nc, .no_line_offset
-    inc d
+    push bc
+    
+    ld b, a
+    xor a
+    
+.pre_clear_loop
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .pre_clear_loop
+    
+    pop bc
     
 .no_line_offset
     pop af
@@ -132,6 +140,21 @@ TextServices_PrepareGlyphForComposition::
     ld c, b
     ld b, 0
     M_System_FarCopy
+    
+    ;This only works 'cause it's 8 bytes
+    ld a, (TextServices_GlyphCacheArea + 8) & $FF
+    sub a, e
+    jr z, .exit
+    
+    ld b, a
+    xor a
+.post_clear_loop
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .post_clear_loop
+    
+.exit
     ret
 
 ;Given a glyph tile and a window tile, compose them together.
