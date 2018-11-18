@@ -100,9 +100,47 @@ TextServices_SetWindowCursorPosition::
     srl a
     ld [hli], a
     
-    ;TODO: Something with the cursor?
-    inc hl
-    inc hl
+    push hl
+    
+    ld de, (M_TextServices_WindowBacking + 1 - M_TextServices_WindowWidth)
+    add hl, de
+    ld d, [hl]
+    
+    push de
+    
+    ld de, (M_TextServices_WindowWidth - M_TextServices_WindowCursor)
+    add hl, de
+    ld a, [hli]
+    ld h, [hl]
+    ld l, a
+    
+    pop af
+    push bc
+    
+    srl c
+    srl c
+    srl c
+    call TextServices_IncrementByTileRows
+    
+    pop bc
+    push bc
+    
+    srl b
+    srl b
+    srl b
+    ld a, b
+    call TextServices_IncrementByTiles
+    
+    pop bc
+    
+    ld d, h
+    ld e, l
+    
+    pop hl
+    ld a, e
+    ld [hli], a
+    ld a, d
+    ld [hli], a
     
     ld a, b
     and $07

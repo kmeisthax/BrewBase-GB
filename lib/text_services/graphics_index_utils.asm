@@ -53,7 +53,7 @@ TextServices_IncrementByTiles::
 ;C = Number of rows to increment
 ;HL = Current tile pointer
 ;Returns HL = New tile pointer
-TextServices_IncrementByTileRows:
+TextServices_IncrementByTileRows::
     push af
     push de
     

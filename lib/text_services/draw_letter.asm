@@ -9,7 +9,8 @@ W_TextServices_CurrentCacheMask: ds 1
 W_TextServices_CurrentVerticalGlyphPosition: ds 1
 W_TextServices_CurrentHorizontalTile: ds 1
 W_TextServices_CurrentHorizontalShift: ds 1
-W_TextServices_CurrentWindowBacking: ds 3
+W_TextServices_CurrentWindowTile: ds 3
+W_TextServices_RowStartingTile: ds 2
 W_TextServices_CurrentGlyphBase: ds 3
 
 SECTION "Text Services - Draw Letter Main Routine", ROM0
@@ -85,11 +86,18 @@ TextServices_DrawGlyphToWindow::
     ld hl, M_TextServices_WindowBacking
     add hl, de
     ld a, [hli]
-    ld [W_TextServices_CurrentWindowBacking], a
+    ld [W_TextServices_CurrentWindowTile], a
+    
+    pop de
+    push de
+    ld hl, M_TextServices_WindowCursor
+    add hl, de
     ld a, [hli]
-    ld [W_TextServices_CurrentWindowBacking + 1], a
+    ld [W_TextServices_CurrentWindowTile + 1], a
+    ld [W_TextServices_RowStartingTile + 0], a
     ld a, [hli]
-    ld [W_TextServices_CurrentWindowBacking + 2], a
+    ld [W_TextServices_CurrentWindowTile + 2], a
+    ld [W_TextServices_RowStartingTile + 1], a
     
     pop de
     push de
@@ -146,9 +154,9 @@ TextServices_DrawGlyphToWindow::
     ld e, 3 ;TODO: Pull the text window color
     
     ;TODO: VRAM banking.
-    ld a, [W_TextServices_CurrentWindowBacking + 1]
+    ld a, [W_TextServices_CurrentWindowTile + 1]
     ld l, a
-    ld a, [W_TextServices_CurrentWindowBacking + 2]
+    ld a, [W_TextServices_CurrentWindowTile + 2]
     ld h, a
     
     call TextServices_ComposeGlyphWithTile
@@ -185,17 +193,17 @@ TextServices_DrawGlyphToWindow::
     ld e, 3 ;TODO: Pull the text window color
     
     ;TODO: VRAM banking.
-    ld a, [W_TextServices_CurrentWindowBacking + 1]
+    ld a, [W_TextServices_CurrentWindowTile + 1]
     ld l, a
-    ld a, [W_TextServices_CurrentWindowBacking + 2]
+    ld a, [W_TextServices_CurrentWindowTile + 2]
     ld h, a
     
     call TextServices_ComposeGlyphWithTile
     
     ld a, l
-    ld [W_TextServices_CurrentWindowBacking + 1], a
+    ld [W_TextServices_CurrentWindowTile + 1], a
     ld a, h
-    ld [W_TextServices_CurrentWindowBacking + 2], a
+    ld [W_TextServices_CurrentWindowTile + 2], a
     jr .tile_loop
     
 .exit_tile_loop
@@ -235,22 +243,19 @@ TextServices_DrawGlyphToWindow::
     add hl, de
     ld b, [hl]
     
-    pop de
-    push de
-    ld hl, M_TextServices_WindowBacking
-    add hl, de
-    ld a, [hli]
-    ld [W_TextServices_CurrentWindowBacking], a
-    ld a, [hli]
-    ld h, [hl]
+    ld a, [W_TextServices_RowStartingTile]
     ld l, a
+    ld a, [W_TextServices_RowStartingTile + 1]
+    ld h, a
     ld a, b
     call TextServices_IncrementByTiles
     
     ld a, l
-    ld [W_TextServices_CurrentWindowBacking + 1], a
+    ld [W_TextServices_CurrentWindowTile + 1], a
+    ld [W_TextServices_RowStartingTile], a
     ld a, h
-    ld [W_TextServices_CurrentWindowBacking + 2], a
+    ld [W_TextServices_CurrentWindowTile + 2], a
+    ld [W_TextServices_RowStartingTile + 1], a
     
     jp .row_loop
     

@@ -78,6 +78,24 @@ Game_StateDrawText::
     ld hl, W_Game_Window
     call TextServices_DrawGlyphToWindow
     
+    ld hl, W_Game_Window
+    ld b, 11
+    ld c, 3
+    call TextServices_SetWindowCursorPosition
+    
+    ld bc, $62
+    ld hl, W_Game_Window
+    call TextServices_DrawGlyphToWindow
+    
+    ld hl, W_Game_Window
+    ld b, 16
+    ld c, 3
+    call TextServices_SetWindowCursorPosition
+    
+    ld bc, $65
+    ld hl, W_Game_Window
+    call TextServices_DrawGlyphToWindow
+    
     ld a, 0
     push af
     ld hl, $9100
