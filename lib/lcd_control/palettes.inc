@@ -1,0 +1,9 @@
+M_LCDC_PaletteColorSize EQU 2
+M_LCDC_PaletteColorCount EQU 4
+M_LCDC_PaletteEntrySize EQU M_LCDC_PaletteColorSize * M_LCDC_PaletteColorCount
+M_LCDC_PaletteEntryCount EQU 8
+M_LCDC_PaletteSize EQU M_LCDC_PaletteEntrySize * M_LCDC_PaletteEntryCount
+
+M_LCDC_PalettesUnset EQU 0
+M_LCDC_PalettesDirty EQU 1
+M_LCDC_PalettesClean EQU 2
