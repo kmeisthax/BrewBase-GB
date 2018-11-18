@@ -13,6 +13,14 @@ main::
     call System_HiMemoryInit
     call System_BankInit
     call LCDC_VBlankInit
+    
+    ;Enable LCD display and VBlank interrupts by default.
+    ld a, $80
+    ld [W_LCDC_ShadowLCDC], a
+    
+    ld a, $08
+    ld [W_LCDC_ShadowSTAT], a
+    
     ei
     
     ;Executed once per frame.
@@ -25,6 +33,7 @@ main::
     call Game_StateMachine
     
     ;Stop processing until we get a Vblank interrupt.
+    ;TODO: Detect if Vblanks are unavailable, and if so, don't wait for them.
 .interruptFilter
     halt
     nop
