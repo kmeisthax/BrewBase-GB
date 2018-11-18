@@ -124,6 +124,7 @@ LCDC_ExecuteCurrentNDMAEntry::
     pop bc
     
     ld a, c
+    dec a
     
 .update_entry_status
     ;At this point, we need to update the entry
@@ -149,7 +150,15 @@ LCDC_ExecuteCurrentNDMAEntry::
     ld [hli], a
     ld a, [hl]
     adc a, b
+    ld [hli], a ;Backing store + Bytes transferred
+    
+    inc hl
+    ld a, [hl]
+    add a, c
     ld [hli], a
+    ld a, [hl]
+    adc a, b
+    ld [hli], a ;VRAM location + Bytes transferred
     
     pop bc
     jr .report_time_utilization
@@ -186,8 +195,45 @@ LCDC_ExecuteCurrentNDMAEntry::
 ;This routine clobbers REG_VBK, we assume all VRAM access will occur using this
 ;routine. If not the case, you will need to use another routine.
 LCDC_ResolvePendingNDMA::
-    ld c, 0     ;current arena entry
     ld b, M_LCDC_NDMARequestProcessingCap ;total processing time remaining
+    
+    ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
+    cp M_LCDC_VallocStatusDirty
+    jr nz, .no_dirty_chunk
+    
+.dirty_chunk_detected
+    ld a, b
+    call LCDC_ExecuteCurrentNDMAEntry
+    ld b, a
+    
+    ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
+    cp M_LCDC_VallocStatusClean
+    jr nz, .exitDMAProcessing
+    
+    ;Copy back the old status
+    ld a, [W_LCDC_CurrentVallocEntryIndex]
+    ld d, 0
+    sla a
+    rl d
+    sla a
+    rl d
+    sla a
+    rl d ;Assumes vallocs are 8 bytes. M_LCDC_VallocStructSize may change
+    ld e, a
+    ld hl, W_LCDC_VallocArena
+    add hl, de
+    ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
+    ld [hl], a
+    
+    ;If we're out of time, we're out of time.
+    ;TODO: Actually, we did so much faffing about back there we should probably
+    ;be losing DMA cap time for it
+    ld a, b
+    cp 0
+    jr z, .exitDMAProcessing
+    
+.no_dirty_chunk
+    ld c, 0     ;current arena entry
     ld hl, W_LCDC_VallocArena
     
 .processEntry
