@@ -123,14 +123,13 @@ LCDC_ExecuteCurrentNDMAEntry::
     pop de
     pop bc
     
-    ld a, c
-    dec a
-    
 .update_entry_status
     ;At this point, we need to update the entry
+    dec c
     ld hl, W_LCDC_CurrentVallocEntry + M_LCDC_VallocSize
-    sub [hl]
-    jp z, .transfer_complete
+    ld a, [hl]
+    sub a, c
+    jr z, .transfer_complete
     
 .transfer_ongoing
     ld [hli], a
@@ -169,6 +168,7 @@ LCDC_ExecuteCurrentNDMAEntry::
     ld [hl], a
     
 .report_time_utilization
+    inc c
     ;B = how much time we started with
     ;C = how much time we took
     ld a, b
@@ -197,6 +197,14 @@ LCDC_ExecuteCurrentNDMAEntry::
 LCDC_ResolvePendingNDMA::
     ld b, M_LCDC_NDMARequestProcessingCap ;total processing time remaining
     
+    ld a, [W_System_ARegStartup]
+    cp M_BIOS_CPU_CGB
+    jr z, .check_for_dirty_chunk
+    
+.use_emulated_ndma_processing_cap
+    ld b, M_LCDC_NDMARequestEmulatedProcessingCap
+    
+.check_for_dirty_chunk
     ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
     cp M_LCDC_VallocStatusDirty
     jr nz, .no_dirty_chunk
