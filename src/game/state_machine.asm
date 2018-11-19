@@ -37,10 +37,10 @@ Game_StateMachine::
 Game_StateLoadScreen::
     ld a, 0
     push af
-    ld hl, $9000
+    ld hl, $8000
     push hl
     ld a, 0
-    ld e, 9
+    ld e, $FE
     ld bc, TestGraphic
     ld d, BANK(TestGraphic)
     call LCDC_CreateVallocMapping
@@ -60,8 +60,8 @@ Game_StateDrawText::
     call TextServices_SetWindowSize
     
     ld hl, W_Game_Window
-    ld a, BANK(Game_Font)
-    ld bc, Game_Font
+    ld a, BANK(Game_UnrelatedFont)
+    ld bc, Game_UnrelatedFont
     call TextServices_SetWindowFont
     
     ld hl, W_Game_Window
