@@ -179,11 +179,12 @@ LCDC_ExecuteCurrentNDMAEntry::
     pop bc
     ret
 
-;Resolve pending NDMA requests, if any.
+;Resolve dirty Valloc blocks, if any, using the New general-purpose DMA
+;mechanism (NDMA).
 ;
 ;Requests are resolved from the top of the arena to the bottom.
 ;
-;NDMA requests handled here will be resolved as general-purpose DMA; this 
+;Dirty vallocs handled here will be resolved as general-purpose DMA; this
 ;routine is thus unsuitable for use outside of V-blank. Ideally, it should be
 ;executed first thing as part of the VBlank IRQ. Care is taken within the
 ;routine to avoid exhausting VBlank time entirely; transfer speed is throttled
