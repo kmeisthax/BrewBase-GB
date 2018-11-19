@@ -136,6 +136,7 @@ LCDC_ExecuteCurrentNDMAEntry::
     
     push bc
     
+    ld a, c
     and $F0
     swap a
     ld b, a
