@@ -187,8 +187,10 @@ LCDC_ExecuteCurrentNDMAEntry::
 ;routine is thus unsuitable for use outside of V-blank. Ideally, it should be
 ;executed first thing as part of the VBlank IRQ. Care is taken within the
 ;routine to avoid exhausting VBlank time entirely; transfer speed is throttled
-;to a rate of 4kb/frame. This should be plenty for everything but 60fps full
-;motion video (and, tbh, you can get up to 7kb/frame by using HDMA)
+;to a rate of about 1kb/frame. This should still be plenty for everything but
+;full motion video. For higher DMA bandwidth, you should be looking into the
+;H-Blank DMA mechanism (HDMA), which allows copying one tile per screen line, or
+;a little over 2kb/frame - twice what V-Blank DMA can handle.
 ;
 ;NOTE: This routine does not respect callee cleanup conventions. You will need
 ;to push all registers beforehand.
