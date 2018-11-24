@@ -16,6 +16,8 @@ SECTION "LCDC HDMA Handler", ROM0 ;and it NEEDS to be there, too
 ;is "near" enough. We actually terminate a few lines before then so that we have
 ;enough time to update CurrentVallocEntry before V-blank is actually triggered.
 LCDC_ExecuteCurrentHDMAEntry::
+    push bc
+    
     ld hl, W_LCDC_CurrentVallocEntry + M_LCDC_VallocSize
     ld a, [hli]
     ld c, a
@@ -50,6 +52,31 @@ LCDC_ExecuteCurrentHDMAEntry::
     ld a, [hli]
     ld [REG_VBK], a
     
+    ;HDMA must NOT be started during mode 0, otherwise Bad Things happen.
+    ;We actually wait for Mode 2 for extra safety, here's why:
+    ;
+    ;Critical path timing: 40 cycles for the check, 28 to produce and write
+    ;HDMA5 register. Since we have a transfer safety buffer to rule out VBlank,
+    ;we will always see LCDC modes 0, 2, and 3 in that order. The worst case
+    ;timing scenario is that we see the end of one particular mode, so we need
+    ;to compute conditionals and write the HDMA5 value in less time than LCDC
+    ;could possibly move to mode 0.
+    ;
+    ;If we wait for Mode 2, then we have a buffer equal to the shortest possible
+    ;Mode 3 timing. Pandocs claims Mode 3 is a minimum of 170 cycles, which
+    ;exceeds the critical path timing determined above. If we were to check for
+    ;mode 3, it is possible that we would read a 3 right before entering mode 0,
+    ;which would be bad. If Mode 2 didn't exist, then we would have to check for
+    ;the end of mode 0 instead, i.e. check for mode 0, then check for mode 3.
+    ;The last concern is how likely we are to miss mode 2 entirely. Since it's
+    ;supposedly 80 cycles long, which is almost twice as long as the check loop,
+    ;we have multiple chances to read Mode 2.
+.wait_for_not_blanking
+    ld a, [REG_STAT]
+    and $03
+    cp 2
+    jr nz, .wait_for_not_blanking
+    
     ld a, c
     or $80
     ld [REG_HDMA5], a   ;Trigger the actual HDMA transfer
@@ -57,13 +84,45 @@ LCDC_ExecuteCurrentHDMAEntry::
     ;At this point, HDMA is active, but so is our CPU. HDMA steals cycles so we
     ;just need to stop it if we're running into Vblank.
 .idle_loop
+    ld a, [REG_HDMA5]
+    cp $FF
+    jr z, .hdma_completed_naturally
+    
     ld a, [REG_LY]
     cp M_LCDC_HDMARequestTerminationLine
     jr nc, .terminate_hdma
+    jr .idle_loop
     
 .terminate_hdma
-    xor a
+    ld a, [REG_HDMA5]
+    and $7F
     ld [REG_HDMA5], a
+    
+    ld hl, W_LCDC_CurrentVallocEntry + M_LCDC_VallocSize
+    ld [hli], a
+    
+    ld a, [REG_HDMA2]
+    ld [hli], a
+    
+    ld a, [REG_HDMA1]
+    ld [hli], a
+    
+    inc hl
+    
+    ld a, [REG_HDMA4]
+    ld [hli], a
+    
+    ld a, [REG_HDMA3]
+    ld [hli], a
+    
+    pop bc
+    ret
+    
+.hdma_completed_naturally
+    ld a, M_LCDC_VallocStatusClean
+    ld [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus], a
+    
+    pop bc
     ret
 
 ;Resolve dirty Valloc blocks, if any, using the H-Blank DMA mechanism (HDMA).
@@ -78,6 +137,18 @@ LCDC_ExecuteCurrentHDMAEntry::
 ;this routine provides the safest option by means of spinning the CPU until HDMA
 ;has completed or LY indicates that we are about to enter V-blank.
 ;
+;This routine modifies data structures that are shared between HDMA and NDMA. It
+;is highly recommended that you do one of the following to prevent unpredictable
+;DMA transfer failures:
+; 
+;  - Disable all interrupts before/after HDMA
+;  - Disable V-blank interrupts before/after HDMA
+;  - Ensure all non-V-blank interrupt handlers are short-lived
+;
+;TODO: The current iteration of this routine disables interrupts throughout the
+;HDMA transfer period. Come up with a better safety mechanism.
+;
+;TODO: Support all of the following.
 ;  - MID-HDMA COMPUTATION NOTICE -
 ;
 ;If you are interested in performing computation during HDMA, you must provide
@@ -85,8 +156,12 @@ LCDC_ExecuteCurrentHDMAEntry::
 ;warnings apply to this facility:
 ;
 ;  - Your idle routine must respect callee-cleanup calling conventions.
-;  - Your idle routine must not execute for longer than 4 screen lines in any
-;    possible case.
+;  - Your idle routine must not execute for longer than the HDMA request safety
+;    buffer. If this is unacceptable, you must instead establish your own timing
+;    safety and refuse to execute if current LY timing would exceed that buffer.
+;    e.g. If the request safety buffer is 4 lines, and your routine needs 8
+;    lines of execution time to be efficient, it must check LY and refrain from
+;    execution 
 ;  - Your idle routine must be idempotent, as it will be executed repeatedly.
 ;  - Your idle routine may schedule a different idle routine to be executed. If
 ;    your idle routine cannot be written to be idempotent, then changing the
@@ -113,5 +188,33 @@ LCDC_ExecuteCurrentHDMAEntry::
 ;     - Take care that no dirty vallocs are backed by SRAM, or
 ;     - Ensure that all dirty vallocs exist within the same SRAM bank, and only
 ;       access the same SRAM bank as all dirty vallocs in that region.
+;
+;In the interest of making compliance with the DMA banking restrictions easier,
+;the idle routine will be called with the following arguments:
+;
+; A = Current SOURCE HDMA bank
+; HL = Current SOURCE HDMA memory address
+;
+; With these pieces of information it is possible to dynamically determine if it
+; is safe to engage in banked memory access in your idle routine.
 LCDC_ResolvePendingHDMA::
+    push af
     
+    ld a, [REG_LY]
+    cp M_LCDC_HDMARequestTerminationLine
+    jr nc, .no_hdma_plz
+    
+.hdma_safe
+    di
+    ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
+    cp M_LCDC_VallocStatusDirty
+    jr nz, .no_current_dirty_transfer
+    
+    call LCDC_ExecuteCurrentHDMAEntry
+    
+.no_current_dirty_transfer
+    ei
+    
+.no_hdma_plz
+    pop af
+    ret

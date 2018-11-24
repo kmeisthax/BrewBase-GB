@@ -31,6 +31,7 @@ main::
     xor a
     ld [W_LCDC_VBlankExecuted], a
     call Game_StateMachine
+    call LCDC_ResolvePendingHDMA
     
     ;Stop processing until we get a Vblank interrupt.
     ;TODO: Detect if Vblanks are unavailable, and if so, don't wait for them.
