@@ -70,7 +70,7 @@ Game_StateDrawText::
     
     ld hl, W_Game_Window
     ld b, 8
-    ld c, 0
+    ld c, 8
     M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $62
@@ -79,7 +79,7 @@ Game_StateDrawText::
     
     ld hl, W_Game_Window
     ld b, 16
-    ld c, 0
+    ld c, 7
     M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $65
@@ -88,7 +88,7 @@ Game_StateDrawText::
     
     ld hl, W_Game_Window
     ld b, 24
-    ld c, 0
+    ld c, 6
     M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $21
