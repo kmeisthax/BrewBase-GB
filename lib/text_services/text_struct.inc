@@ -45,13 +45,11 @@ M_TextServices_WindowRowBaseline EQU $3;How many lines is the baseline
 
 ;The Window Cursor is the graphical location of where to draw the next line of
 ;text.
-M_TextServices_WindowCursorX EQU $4  ;X index of tile currently being drawn to.
-M_TextServices_WindowCursorY EQU $5  ;Y index of tile currently being drawn to.
-M_TextServices_WindowCursor EQU $6   ;Far pointer to current cursor tile.
-M_TextServices_WindowShiftX EQU $8   ;How many pixels into the current tile
-                                     ;do we start drawing the next glyph
-M_TextServices_WindowShiftY EQU $9   ;How many lines down into the current tile
-                                     ;do we start drawing the next glyph
+M_TextServices_WindowCursorX EQU $4  ;X coordinate of position to draw to
+M_TextServices_WindowCursorY EQU $5  ;Y coordinate of position to draw to
+M_TextServices_WindowCursor EQU $6   ;Near pointer to current cursor tile.
+
+;2 bytes of padding [8,$A)
 
 ;The Font is the set of glyphs used to draw text.
 M_TextServices_WindowFont EQU $A     ;Far pointer to font structure

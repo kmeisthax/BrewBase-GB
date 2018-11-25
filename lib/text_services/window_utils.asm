@@ -89,15 +89,9 @@ TextServices_SetWindowCursorPosition::
     add hl, de
     
     ld a, b
-    srl a
-    srl a
-    srl a
     ld [hli], a
     
     ld a, c
-    srl a
-    srl a
-    srl a
     ld [hli], a
     
     push hl
@@ -123,15 +117,12 @@ TextServices_SetWindowCursorPosition::
     call TextServices_IncrementByTileRows
     
     pop bc
-    push bc
     
     srl b
     srl b
     srl b
     ld a, b
     call TextServices_IncrementByTiles
-    
-    pop bc
     
     ld d, h
     ld e, l
@@ -140,14 +131,6 @@ TextServices_SetWindowCursorPosition::
     ld a, e
     ld [hli], a
     ld a, d
-    ld [hli], a
-    
-    ld a, b
-    and $07
-    ld [hli], a
-    
-    ld a, c
-    and $07
     ld [hli], a
     
     pop de

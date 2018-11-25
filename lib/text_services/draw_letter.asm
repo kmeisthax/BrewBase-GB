@@ -90,38 +90,22 @@ TextServices_DrawGlyphToWindow::
     
     pop de
     push de
-    ld hl, M_TextServices_WindowCursor
+    ld hl, M_TextServices_WindowCursorX
     add hl, de
     ld a, [hli]
+    and $07
+    ld [W_TextServices_CurrentHorizontalShift], a
+    
+    ld a, [hli] ;M_TextServices_WindowCursorY
+    ld [W_TextServices_StartingVerticalCursor], a
+    ld [W_TextServices_CurrentVerticalCursor], a
+    
+    ld a, [hli] ;M_TextServices_WindowCursor
     ld [W_TextServices_CurrentWindowTile + 1], a
     ld [W_TextServices_RowStartingTile + 0], a
     ld a, [hli]
     ld [W_TextServices_CurrentWindowTile + 2], a
     ld [W_TextServices_RowStartingTile + 1], a
-    
-    pop de
-    push de
-    ld hl, M_TextServices_WindowCursorY
-    add hl, de
-    ld a, [hl]
-    sla a
-    sla a
-    sla a
-    
-    pop de
-    push de
-    ld hl, M_TextServices_WindowShiftY
-    add hl, de
-    or [hl]
-    ld [W_TextServices_StartingVerticalCursor], a
-    ld [W_TextServices_CurrentVerticalCursor], a
-    
-    pop de
-    push de
-    ld hl, M_TextServices_WindowShiftX
-    add hl, de
-    ld a, [hl]
-    ld [W_TextServices_CurrentHorizontalShift], a
     
 .row_loop
     ld a, [W_TextServices_StartingVerticalCursor]
