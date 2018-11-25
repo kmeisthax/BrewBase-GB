@@ -7,6 +7,13 @@ M_TextServices_FontMetricsData EQU $7 ;Where the font glyph metrics live in ROM.
 
 M_TextServices_FontSize EQU $9 ;Size of the font header structure.
 
+M_TextServices_FontMetricWidth EQU 0    ;Width of the glyph, in pixels.
+M_TextServices_FontMetricHeight EQU 1   ;Height of the glyph, in pixels.
+M_TextServices_FontMetricBaseline EQU 2 ;Vertical position of the baseline in
+                                        ;the glyph.
+
+M_TextServices_FontMetricSize EQU 4 ;Size of a font metric entry.
+
 ;Glyph data is formatted as an array of tightly packed glyphs.
 ;Each glyph consists of 1bpp graphics data, organized as GlyphHeight lines of
 ;GlyphWidth bytes in length. Each 8 pixel column of graphics data is stored
