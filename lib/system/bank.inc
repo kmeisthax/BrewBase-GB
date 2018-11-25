@@ -1,7 +1,7 @@
 M_System_FarCall: MACRO
     rst $00
-    db BANK(\1)
     dw \1
+    db BANK(\1)
     ENDM
 
 M_System_FarCallRestricted: MACRO
