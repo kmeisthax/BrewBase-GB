@@ -16,7 +16,9 @@ SECTION "LCDC HDMA Handler", ROM0 ;and it NEEDS to be there, too
 ;is "near" enough. We actually terminate a few lines before then so that we have
 ;enough time to update CurrentVallocEntry before V-blank is actually triggered.
 LCDC_ExecuteCurrentHDMAEntry::
+    push af
     push bc
+    push hl
     
     ld hl, W_LCDC_CurrentVallocEntry + M_LCDC_VallocSize
     ld a, [hli]
@@ -95,9 +97,20 @@ LCDC_ExecuteCurrentHDMAEntry::
     
 .terminate_hdma
     ld a, [REG_HDMA5]
+    cp $FF
+    jr z, .hdma_completed_naturally
+    
     and $7F
     ld [REG_HDMA5], a
     
+    ;Preserve the high bit of the transfer length
+    bit 7, c
+    jr z, .no_oversized_transfer
+    
+.oversized_transfer
+    or a, $80
+    
+.no_oversized_transfer
     ld hl, W_LCDC_CurrentVallocEntry + M_LCDC_VallocSize
     ld [hli], a
     
@@ -115,14 +128,24 @@ LCDC_ExecuteCurrentHDMAEntry::
     ld a, [REG_HDMA3]
     ld [hli], a
     
+    pop hl
     pop bc
+    pop af
     ret
     
 .hdma_completed_naturally
+    ;HDMA can only transfer $7F blocks at a time; if we transfer more than that
+    ;then we need to queue a second transfer for the other half of the data.
+    bit 7, c
+    ld a, $7F
+    jr nz, .no_oversized_transfer
+    
     ld a, M_LCDC_VallocStatusClean
     ld [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus], a
     
+    pop hl
     pop bc
+    pop af
     ret
 
 ;Resolve dirty Valloc blocks, if any, using the H-Blank DMA mechanism (HDMA).
@@ -199,6 +222,8 @@ LCDC_ExecuteCurrentHDMAEntry::
 ; is safe to engage in banked memory access in your idle routine.
 LCDC_ResolvePendingHDMA::
     push af
+    push de
+    push hl
     
     ld a, [REG_LY]
     cp M_LCDC_HDMARequestTerminationLine
@@ -212,9 +237,30 @@ LCDC_ResolvePendingHDMA::
     
     call LCDC_ExecuteCurrentHDMAEntry
     
+    ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
+    cp M_LCDC_VallocStatusClean
+    jr nz, .no_current_dirty_transfer
+    
+    ;Copy back the old status
+    ld a, [W_LCDC_CurrentVallocEntryIndex]
+    ld d, 0
+    sla a
+    rl d
+    sla a
+    rl d
+    sla a
+    rl d ;Assumes vallocs are 8 bytes. M_LCDC_VallocStructSize may change
+    ld e, a
+    ld hl, W_LCDC_VallocArena
+    add hl, de
+    ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
+    ld [hl], a
+    
 .no_current_dirty_transfer
     ei
     
 .no_hdma_plz
+    pop hl
+    pop de
     pop af
     ret
