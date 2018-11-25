@@ -13,7 +13,7 @@ W_TextServices_CurrentWindowTile: ds 3
 W_TextServices_RowStartingTile: ds 2
 W_TextServices_CurrentGlyphBase: ds 3
 
-SECTION "Text Services - Draw Letter Main Routine", ROM0
+SECTION "Text Services - Draw Letter Main Routine", ROMX, BANK[1]
 ;Draw a glyph to a window.
 ;
 ;BC = Letter to draw

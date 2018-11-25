@@ -1,6 +1,6 @@
 INCLUDE "lib/brewbase.inc"
 
-SECTION "Text Services - Graphics Index Utils", ROM0
+SECTION "Text Services - Graphics Index Utils", ROMX, BANK[1]
 ;Get the location of the window's current tile
 ;HL = Window structure
 ;BC = X and Y tile offsets

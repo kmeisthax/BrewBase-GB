@@ -57,53 +57,53 @@ Game_StateDrawText::
     ld e, 2
     ld b, 8
     ld c, 6
-    call TextServices_SetWindowSize
+    M_System_FarCall TextServices_SetWindowSize
     
     ld hl, W_Game_Window
     ld a, BANK(Game_UnrelatedFont)
     ld bc, Game_UnrelatedFont
-    call TextServices_SetWindowFont
+    M_System_FarCall TextServices_SetWindowFont
     
     ld hl, W_Game_Window
     ld a, BANK(W_Game_WindowBuffer)
     ld bc, W_Game_WindowBuffer
-    call TextServices_SetWindowBacking
+    M_System_FarCall TextServices_SetWindowBacking
     
     ld hl, W_Game_Window
     ld b, 0
     ld c, 0
-    call TextServices_SetWindowCursorPosition
+    M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $41
     ld hl, W_Game_Window
-    call TextServices_DrawGlyphToWindow
+    M_System_FarCall TextServices_DrawGlyphToWindow
     
     ld hl, W_Game_Window
     ld b, 8
     ld c, 0
-    call TextServices_SetWindowCursorPosition
+    M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $62
     ld hl, W_Game_Window
-    call TextServices_DrawGlyphToWindow
+    M_System_FarCall TextServices_DrawGlyphToWindow
     
     ld hl, W_Game_Window
     ld b, 16
     ld c, 0
-    call TextServices_SetWindowCursorPosition
+    M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $65
     ld hl, W_Game_Window
-    call TextServices_DrawGlyphToWindow
+    M_System_FarCall TextServices_DrawGlyphToWindow
     
     ld hl, W_Game_Window
     ld b, 24
     ld c, 0
-    call TextServices_SetWindowCursorPosition
+    M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $21
     ld hl, W_Game_Window
-    call TextServices_DrawGlyphToWindow
+    M_System_FarCall TextServices_DrawGlyphToWindow
     
     ld a, 0
     push af

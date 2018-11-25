@@ -1,6 +1,6 @@
 INCLUDE "lib/brewbase.inc"
 
-SECTION "Text Services Window Utilities", ROM0
+SECTION "Text Services Window Utilities", ROMX, BANK[1]
 ;Configure a window's size, including row settings.
 ;
 ; B = Text row height in pixels

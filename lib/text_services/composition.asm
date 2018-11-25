@@ -3,7 +3,7 @@ INCLUDE "lib/brewbase.inc"
 SECTION "Text Services - Tile Composition Memory", WRAM0
 TextServices_GlyphCacheArea: ds 8
 
-SECTION "Text Services - Tile Composition", ROM0
+SECTION "Text Services - Tile Composition", ROMX, BANK[1]
 ;Calculate the vertical shifting parameters for PrepareGlyphForComposition.
 ;
 ;NOTE: This does not consider glyph or window metrics such as baseline. Make
