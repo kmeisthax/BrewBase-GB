@@ -8,7 +8,7 @@ SECTION "Root State Machine", ROMX, BANK[2]
 ;All registers are assumed clobbered.
 Game_StateMachine::
     ld a, [W_Game_StateMachineState]
-    cp (.table - .table_end) / 2
+    cp (.table_end - .table) / 2
     jr nc, .invalid_state
     
     ld hl, .table
