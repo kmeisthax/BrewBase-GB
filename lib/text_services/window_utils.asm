@@ -102,13 +102,13 @@ TextServices_SetWindowCursorPosition::
     
     push hl
     
-    ld de, (M_TextServices_WindowBacking + 1 - M_TextServices_WindowWidth)
+    ld de, (M_TextServices_WindowWidth - M_TextServices_WindowCursor)
     add hl, de
     ld d, [hl]
     
     push de
     
-    ld de, (M_TextServices_WindowWidth - M_TextServices_WindowCursor)
+    ld de, ((M_TextServices_WindowBacking + 1) - M_TextServices_WindowWidth)
     add hl, de
     ld a, [hli]
     ld h, [hl]
