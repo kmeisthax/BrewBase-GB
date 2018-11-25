@@ -30,7 +30,7 @@ main::
 .gameLoop
     xor a
     ld [W_LCDC_VBlankExecuted], a
-    call Game_StateMachine
+    M_System_FarCall Game_StateMachine
     call LCDC_ResolvePendingHDMA
     
     ;Stop processing until we get a Vblank interrupt.
