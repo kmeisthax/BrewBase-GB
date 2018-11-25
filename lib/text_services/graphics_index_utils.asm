@@ -57,16 +57,16 @@ TextServices_IncrementByTileRows::
     push af
     push de
     
-    ld e, 0
+    ld d, 0
     sla a
-    rl e
+    rl d
     sla a
-    rl e
+    rl d
     sla a
-    rl e
+    rl d
     sla a
-    rl e
-    ld d, a
+    rl d
+    ld e, a
     
     ld a, c
 .y_mul_loop
@@ -128,4 +128,17 @@ TextServices_IndexGlyphs::
     add hl, bc
     
     pop af
+    ret
+
+;Index a metrics table by a number of glyphs
+;DE = Glyph index
+;HL = Metrics base pointer
+;
+;Returns HL = Indexed metrics pointer
+TextServices_IndexMetrics::
+    sla e
+    rl d
+    sla e
+    rl d
+    add hl, de
     ret
