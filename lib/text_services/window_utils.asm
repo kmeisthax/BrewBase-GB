@@ -75,7 +75,7 @@ TextServices_SetWindowBacking::
     
     pop de
     ret
-
+    
 ;Position a window's text cursor.
 ;
 ; B = Cursor X position in pixels
@@ -135,4 +135,48 @@ TextServices_SetWindowCursorPosition::
     
     pop de
     pop af
+    ret
+
+;Add an offset to a window's text cursor.
+;
+; B = Cursor X position in pixels
+; C = Cursor Y position in pixels
+; HL = Near pointer to window structure
+TextServices_AdjustWindowCursorPosition::
+    push af
+    push de
+    
+    ld de, M_TextServices_WindowWidth
+    add hl, de
+    ld a, [hl]
+    sla a
+    sla a
+    sla a
+    
+    ld de, (M_TextServices_WindowCursorX - M_TextServices_WindowWidth)
+    add hl, de
+    ld d, a
+    ld a, [hli]
+    add a, b
+    cp d
+    jr c, .no_overflow
+    
+.x_cursor_overflow
+    sub a, d
+    inc c
+    
+.no_overflow
+    ld b, a
+    
+    ld a, [hl]
+    add a, c
+    ld c, a
+    
+    ld de, (0 - M_TextServices_WindowCursorY)
+    add hl, de
+    call TextServices_SetWindowCursorPosition
+    
+    pop de
+    pop af
+    
     ret
