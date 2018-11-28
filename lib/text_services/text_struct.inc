@@ -5,7 +5,7 @@ M_TextServices_FontGlyphCount EQU $2  ;How many standalone glyphs there are.
 M_TextServices_FontGlyphData EQU $4   ;Where the font glyphs live in ROM.
 M_TextServices_FontMetricsData EQU $7 ;Where the font glyph metrics live in ROM.
 
-M_TextServices_FontSize EQU $9 ;Size of the font header structure.
+M_TextServices_FontSize EQU $A ;Size of the font header structure.
 
 M_TextServices_FontMetricWidth EQU 0    ;Width of the glyph, in pixels.
 M_TextServices_FontMetricHeight EQU 1   ;Height of the glyph, in pixels.
