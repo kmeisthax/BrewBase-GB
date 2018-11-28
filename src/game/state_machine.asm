@@ -62,38 +62,39 @@ Game_StateDrawText::
     ld hl, W_Game_Window
     ld b, 0
     ld c, 0
-    M_System_FarCall TextServices_AdjustWindowCursorPosition
+    M_System_FarCall TextServices_SetWindowCursorPosition
     
     ld bc, $41
     ld hl, W_Game_Window
     M_System_FarCall TextServices_DrawGlyphToWindow
     
+    ld de, $41
     ld hl, W_Game_Window
-    ld b, 8
-    ld c, 8
-    M_System_FarCall TextServices_AdjustWindowCursorPosition
+    M_System_FarCall TextServices_AddGlyphWidthToCursor
     
     ld bc, $62
     ld hl, W_Game_Window
     M_System_FarCall TextServices_DrawGlyphToWindow
     
+    ld de, $62
     ld hl, W_Game_Window
-    ld b, 8
-    ld c, 0
-    M_System_FarCall TextServices_AdjustWindowCursorPosition
+    M_System_FarCall TextServices_AddGlyphWidthToCursor
     
     ld bc, $65
     ld hl, W_Game_Window
     M_System_FarCall TextServices_DrawGlyphToWindow
     
+    ld de, $65
     ld hl, W_Game_Window
-    ld b, 8
-    ld c, -8
-    M_System_FarCall TextServices_AdjustWindowCursorPosition
+    M_System_FarCall TextServices_AddGlyphWidthToCursor
     
     ld bc, $21
     ld hl, W_Game_Window
     M_System_FarCall TextServices_DrawGlyphToWindow
+    
+    ld de, $21
+    ld hl, W_Game_Window
+    M_System_FarCall TextServices_AddGlyphWidthToCursor
     
     ld a, 0
     push af
