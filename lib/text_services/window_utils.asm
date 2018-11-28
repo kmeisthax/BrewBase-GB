@@ -180,3 +180,41 @@ TextServices_AdjustWindowCursorPosition::
     pop af
     
     ret
+
+;Add the width of a particular glyph to the window cursor.
+;
+;DE = Glyph drawn
+;HL = Near pointer to window structure
+TextServices_AddGlyphWidthToCursor::
+    push af
+    push bc
+    push hl
+    push de
+    
+    ld bc, M_TextServices_WindowFont
+    add hl, bc
+    
+    ld a, [hli]
+    ld b, a
+    ld a, [hli]
+    ld h, [hl]
+    ld l, a
+    ld a, b
+    ld bc, M_TextServices_FontMetricsData
+    add hl, bc
+    M_System_FarSnap
+    
+    ;WARNING: This depends on M_TextServices_FontMetricWidth being zero
+    pop de
+    call TextServices_IndexMetrics
+    M_System_FarRead
+    
+    ;FarRead conveniently returns B = glyph width
+    inc b
+    ld c, 0
+    pop hl
+    call TextServices_AdjustWindowCursorPosition
+    
+    pop bc
+    pop af
+    ret
