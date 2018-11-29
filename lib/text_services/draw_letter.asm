@@ -61,6 +61,7 @@ TextServices_DrawGlyphToWindow::
     ld bc, 0
     
 .bounds_check_pass
+    push bc
     ld d, b
     ld e, c
     ld hl, W_TextServices_FontHeaderCache + M_TextServices_FontGlyphWidth
@@ -80,6 +81,20 @@ TextServices_DrawGlyphToWindow::
     ld a, h
     ld [W_TextServices_CurrentGlyphBase + 2], a
     
+    ld hl, W_TextServices_FontHeaderCache + M_TextServices_FontMetricsData
+    ld a, [hli]
+    ld b, a
+    ld a, [hli]
+    ld h, [hl]
+    ld l, a
+    ld a, b
+    pop de
+    call TextServices_IndexMetrics
+    inc hl
+    inc hl ;this depends on M_TextServices_FontMetricBaseline's location
+           ;faster than setting up a 16bit add or adc chain
+    M_System_FarRead
+    
     ;Initial setup of the vertical parameters
     pop de
     push de
@@ -90,13 +105,25 @@ TextServices_DrawGlyphToWindow::
     
     pop de
     push de
-    ld hl, M_TextServices_WindowCursorX
+    ld hl, M_TextServices_WindowRowBaseline
     add hl, de
     ld a, [hli]
+    sub a, b
+    jr nc, .no_glyph_top_cut
+    
+    ;TODO: Cut off the tops of glyphs.
+    ;Right now, we can't do that, so we put a zero here
+    xor a
+    
+.no_glyph_top_cut
+    ld b, a
+    
+    ld a, [hli] ;M_TextServices_WindowCursorX
     and $07
     ld [W_TextServices_CurrentHorizontalShift], a
     
     ld a, [hli] ;M_TextServices_WindowCursorY
+    add a, b
     ld [W_TextServices_StartingVerticalCursor], a
     ld [W_TextServices_CurrentVerticalCursor], a
     
