@@ -43,10 +43,10 @@ Game_StateLoadScreen::
     
 Game_StateDrawText::
     ld hl, W_Game_Window
-    ld d, 8
-    ld e, 2
-    ld b, 8
-    ld c, 6
+    ld d, 16
+    ld e, 4
+    ld b, 16
+    ld c, 7
     M_System_FarCall TextServices_SetWindowSize
     
     ld hl, W_Game_Window
@@ -101,7 +101,7 @@ Game_StateDrawText::
     ld hl, $9100
     push hl
     ld a, 1
-    ld e, 15
+    ld e, (W_Game_Window - W_Game_WindowBuffer) / 16 - 1
     ld bc, W_Game_WindowBuffer
     ld d, BANK(W_Game_WindowBuffer)
     call LCDC_CreateVallocMapping

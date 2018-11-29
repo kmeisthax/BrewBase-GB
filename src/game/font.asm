@@ -38,5 +38,5 @@ Game_UnrelatedFontMetrics::
 Game_UnrelatedFontMetrics_END
 
 SECTION "Window", WRAM0[$C200]
-W_Game_WindowBuffer:: ds $100
+W_Game_WindowBuffer:: ds $400
 W_Game_Window:: ds M_TextServices_WindowSize
