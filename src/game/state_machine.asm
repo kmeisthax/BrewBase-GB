@@ -161,8 +161,8 @@ Game_StateBeginDrawText2::
     M_System_FarCall TextServices_SetWindowSize
     
     ld hl, W_Game_Window
-    ld a, BANK(Game_UnrelatedFont)
-    ld bc, Game_UnrelatedFont
+    ld a, BANK(Game_Font)
+    ld bc, Game_Font
     M_System_FarCall TextServices_SetWindowFont
     
     ld hl, W_Game_Window
