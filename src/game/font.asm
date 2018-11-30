@@ -21,7 +21,7 @@ Game_FontMetrics_END
 
 Game_UnrelatedFont::
     db 1, 16
-    dw ((Game_FontGlyphs_END - Game_FontGlyphs) / 16)
+    dw ((Game_UnrelatedFontGlyphs_END - Game_UnrelatedFontGlyphs) / 16)
     db BANK(Game_UnrelatedFontGlyphs)
     dw Game_UnrelatedFontGlyphs
     db BANK(Game_UnrelatedFontMetrics)
@@ -33,7 +33,7 @@ Game_UnrelatedFontGlyphs_END
 
 Game_UnrelatedFontMetrics::
     REPT ((Game_UnrelatedFontGlyphs_END - Game_UnrelatedFontGlyphs) / 16)
-    db 8,16,8,0
+    db 8,8,13,0
     ENDR
 Game_UnrelatedFontMetrics_END
 
