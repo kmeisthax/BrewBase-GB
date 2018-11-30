@@ -2,6 +2,7 @@ INCLUDE "lib/brewbase.inc"
 
 SECTION "Root State Machine Memory", WRAM0
 W_Game_StateMachineState:: ds 1
+W_Game_StringPtr:: ds 2
 
 SECTION "Root State Machine", ROMX, BANK[2]
 ;Execute one step of the main state machine.
@@ -17,7 +18,10 @@ Game_StateMachine::
     
 .table
     dw Game_StateLoadScreen
+    dw Game_StateBeginDrawText
     dw Game_StateDrawText
+    dw Game_StateBeginDrawText2
+    dw Game_StateDrawText2
 .table_end
 
 .invalid_state
@@ -41,12 +45,19 @@ Game_StateLoadScreen::
     
     ret
     
-Game_StateDrawText::
+Game_StateBeginDrawText::
+    ld hl, W_Game_StringPtr
+    ld bc, Game_StateDrawText.text
+    
+    ld [hl], b
+    inc hl
+    ld [hl], c
+    
     ld hl, W_Game_Window
     ld d, 16
     ld e, 4
-    ld b, 16
-    ld c, 7
+    ld b, 12
+    ld c, 10
     M_System_FarCall TextServices_SetWindowSize
     
     ld hl, W_Game_Window
@@ -64,37 +75,41 @@ Game_StateDrawText::
     ld c, 0
     M_System_FarCall TextServices_SetWindowCursorPosition
     
-    ld bc, $41
+    ld a, 2
+    ld [W_Game_StateMachineState], a
+    
+    ret
+    
+Game_StateDrawText::
+    ld hl, W_Game_StringPtr
+    
+    ld d, [hl]
+    inc hl
+    ld e, [hl]
+    
+    ld a, [de]
+    or a
+    jr z, .string_done
+    
+    ld b, 0
+    ld c, a
     ld hl, W_Game_Window
     M_System_FarCall TextServices_DrawGlyphToWindow
     
-    ld de, $41
+    push de
+    ld d, 0
+    ld e, a
     ld hl, W_Game_Window
     M_System_FarCall TextServices_AddGlyphWidthToCursor
+    pop de
+    inc de
     
-    ld bc, $62
-    ld hl, W_Game_Window
-    M_System_FarCall TextServices_DrawGlyphToWindow
+.string_not_done
+    ld hl, W_Game_StringPtr
     
-    ld de, $62
-    ld hl, W_Game_Window
-    M_System_FarCall TextServices_AddGlyphWidthToCursor
-    
-    ld bc, $65
-    ld hl, W_Game_Window
-    M_System_FarCall TextServices_DrawGlyphToWindow
-    
-    ld de, $65
-    ld hl, W_Game_Window
-    M_System_FarCall TextServices_AddGlyphWidthToCursor
-    
-    ld bc, $21
-    ld hl, W_Game_Window
-    M_System_FarCall TextServices_DrawGlyphToWindow
-    
-    ld de, $21
-    ld hl, W_Game_Window
-    M_System_FarCall TextServices_AddGlyphWidthToCursor
+    ld [hl], d
+    inc hl
+    ld [hl], e
     
     ld a, 0
     push af
@@ -107,7 +122,125 @@ Game_StateDrawText::
     call LCDC_CreateVallocMapping
     add sp, 4
     
-    ld a, 2
+    ret
+    
+.string_done
+    ld a, 0
+    push af
+    ld hl, $9100
+    push hl
+    ld a, 1
+    ld e, (W_Game_Window - W_Game_WindowBuffer) / 16 - 1
+    ld bc, W_Game_WindowBuffer
+    ld d, BANK(W_Game_WindowBuffer)
+    call LCDC_CreateVallocMapping
+    add sp, 4
+    
+    ld a, 3
     ld [W_Game_StateMachineState], a
     
     ret
+    
+.text
+    db "But it refused.", 0
+.text_end
+    
+Game_StateBeginDrawText2::
+    ld hl, W_Game_StringPtr
+    ld bc, Game_StateDrawText2.text
+    
+    ld [hl], b
+    inc hl
+    ld [hl], c
+    
+    ld hl, W_Game_Window
+    ld d, 16
+    ld e, 4
+    ld b, 12
+    ld c, 10
+    M_System_FarCall TextServices_SetWindowSize
+    
+    ld hl, W_Game_Window
+    ld a, BANK(Game_UnrelatedFont)
+    ld bc, Game_UnrelatedFont
+    M_System_FarCall TextServices_SetWindowFont
+    
+    ld hl, W_Game_Window
+    ld a, BANK(W_Game_WindowBuffer)
+    ld bc, W_Game_WindowBuffer
+    M_System_FarCall TextServices_SetWindowBacking
+    
+    ld hl, W_Game_Window
+    ld b, 0
+    ld c, 12
+    M_System_FarCall TextServices_SetWindowCursorPosition
+    
+    ld a, 4
+    ld [W_Game_StateMachineState], a
+    
+    ret
+    
+Game_StateDrawText2::
+    ld hl, W_Game_StringPtr
+    
+    ld d, [hl]
+    inc hl
+    ld e, [hl]
+    
+    ld a, [de]
+    or a
+    jr z, .string_done
+    
+    ld b, 0
+    ld c, a
+    ld hl, W_Game_Window
+    M_System_FarCall TextServices_DrawGlyphToWindow
+    
+    push de
+    ld d, 0
+    ld e, a
+    ld hl, W_Game_Window
+    M_System_FarCall TextServices_AddGlyphWidthToCursor
+    pop de
+    inc de
+    
+.string_not_done
+    ld hl, W_Game_StringPtr
+    
+    ld [hl], d
+    inc hl
+    ld [hl], e
+    
+    ld a, 0
+    push af
+    ld hl, $9100
+    push hl
+    ld a, 1
+    ld e, (W_Game_Window - W_Game_WindowBuffer) / 16 - 1
+    ld bc, W_Game_WindowBuffer
+    ld d, BANK(W_Game_WindowBuffer)
+    call LCDC_CreateVallocMapping
+    add sp, 4
+    
+    ret
+    
+.string_done
+    ld a, 0
+    push af
+    ld hl, $9100
+    push hl
+    ld a, 1
+    ld e, (W_Game_Window - W_Game_WindowBuffer) / 16 - 1
+    ld bc, W_Game_WindowBuffer
+    ld d, BANK(W_Game_WindowBuffer)
+    call LCDC_CreateVallocMapping
+    add sp, 4
+    
+    ld a, 5
+    ld [W_Game_StateMachineState], a
+    
+    ret
+    
+.text
+    db "But nobody came.", 0
+.text_end
