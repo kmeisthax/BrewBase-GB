@@ -12,6 +12,7 @@ SECTION "Text Services - Tile Composition", ROMX, BANK[1]
 ;   B = Top Edge of Glyph (Cursor Y at start of drawing, pixels)
 ;   C = Glyph Height
 ;   D = Current Window Cursor Y (Cursor Y at start, current tile Y after, pixels)
+;   E = Vertical baseline adjustment
 ; Returns
 ;   A = Cache mask configuration
 ;       (hi nybble: Vertical line shift count)
@@ -20,6 +21,13 @@ SECTION "Text Services - Tile Composition", ROMX, BANK[1]
 TextServices_ComputeVerticalShiftingParameters::
     ld a, d
     sub b
+    bit 7, e
+    jr z, .cannot_use_baseline_adjustment
+    
+.clip_glyph_for_baseline
+    sub e
+    
+.cannot_use_baseline_adjustment
     push af ;Store the vertical copy start position
     
     ;Compute how many lines remain in the glyph if we copy from that point

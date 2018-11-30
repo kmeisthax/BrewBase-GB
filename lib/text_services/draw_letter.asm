@@ -3,6 +3,7 @@ INCLUDE "lib/brewbase.inc"
 SECTION "Text Services - Draw Letter Main Routine Memory", WRAM0
 W_TextServices_FontHeaderCache: ds M_TextServices_FontSize
 
+W_TextServices_CurrentBaselineAdjustment: ds 1
 W_TextServices_CurrentVerticalCursor: ds 1
 W_TextServices_StartingVerticalCursor: ds 1
 W_TextServices_CurrentCacheMask: ds 1
@@ -109,21 +110,28 @@ TextServices_DrawGlyphToWindow::
     add hl, de
     ld a, [hli]
     sub a, b
-    jr nc, .no_glyph_top_cut
-    
-    ;TODO: Cut off the tops of glyphs.
-    ;Right now, we can't do that, so we put a zero here
-    xor a
-    
-.no_glyph_top_cut
     ld b, a
+    ld [W_TextServices_CurrentBaselineAdjustment], a
     
     ld a, [hli] ;M_TextServices_WindowCursorX
     and $07
     ld [W_TextServices_CurrentHorizontalShift], a
     
     ld a, [hli] ;M_TextServices_WindowCursorY
+    bit 7, b
+    jr nz, .cannot_use_baseline_adjustment
+    
+    ;If the glyph baseline adjustment is positive, the glyph is too short and
+    ;we push it down by adjusting the window cursor. If it's negative, it's too
+    ;tall and we need to clip it, which is calculated in ComputeVertical ---
+    ;ShiftingParameters.
+    ;
+    ;TODO: What if the baseline adjustment means we need to clip the glyph on
+    ;      the bottom?
+.adjust_cursor_for_baseline
     add a, b
+    
+.cannot_use_baseline_adjustment
     ld [W_TextServices_StartingVerticalCursor], a
     ld [W_TextServices_CurrentVerticalCursor], a
     
@@ -141,6 +149,8 @@ TextServices_DrawGlyphToWindow::
     ld c, a
     ld a, [W_TextServices_CurrentVerticalCursor]
     ld d, a
+    ld a, [W_TextServices_CurrentBaselineAdjustment]
+    ld e, a
     call TextServices_ComputeVerticalShiftingParameters
     ld [W_TextServices_CurrentCacheMask], a
     ld a, b
