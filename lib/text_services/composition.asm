@@ -196,9 +196,13 @@ TextServices_ComposeGlyphWithTile::
     jr nz, .negative_shift
     
 .positive_shift_loop
+    REPT 7
     srl a
     dec d
-    jr nz, .positive_shift_loop
+    jr z, .recolor_1bpp_graphics
+    ENDR
+    srl a
+    dec d
     jr .recolor_1bpp_graphics
     
 .negative_shift
@@ -209,45 +213,68 @@ TextServices_ComposeGlyphWithTile::
     pop af
     
 .negative_shift_loop
+    REPT 7
     sla a
     dec d
-    jr nz, .negative_shift_loop
+    jr z, .recolor_1bpp_graphics
+    ENDR
+    sla a
+    dec d
     
 .recolor_1bpp_graphics
-    push af
-    bit 0, e
-    jr nz, .low_color_positive
-    
-.low_color_negative
-    cpl
-    and a, [hl]
-    jr .recolor_1bpp_graphics_hi
-
-.low_color_positive
     ld d, a
-    or a, [hl]
+    ld a, e
+    and a
+    jr z, .recolor_1bpp_graphics_col0
+    dec a
+    jr z, .recolor_1bpp_graphics_col1
+    dec a
+    jr z, .recolor_1bpp_graphics_col2
     
-.recolor_1bpp_graphics_hi
+.recolor_1bpp_graphics_col3
+    ld a, d
+    or a, [hl]
     ld [hli], a
-    pop af
-    bit 1, e
-    jr nz, .hi_color_positive
+    ld a, d
+    or a, [hl]
+    ld [hli], a
+    jr .recolor_1bpp_graphics_done
     
-.hi_color_negative
+.recolor_1bpp_graphics_col2
+    ld a, d
     cpl
     and a, [hl]
-    jr .recolor_1bpp_graphics_done
-
-.hi_color_positive
-    ld d, a
+    ld [hli], a
+    ld a, d
     or a, [hl]
+    ld [hli], a
+    jr .recolor_1bpp_graphics_done
+    
+.recolor_1bpp_graphics_col1
+    ld a, d
+    or a, [hl]
+    ld [hli], a
+    ld a, d
+    cpl
+    and a, [hl]
+    ld [hli], a
+    jr .recolor_1bpp_graphics_done
+    
+.recolor_1bpp_graphics_col0
+    ld a, d
+    cpl
+    and a, [hl]
+    ld [hli], a
+    ld a, d
+    cpl
+    and a, [hl]
+    ld [hli], a
     
 .recolor_1bpp_graphics_done
-    ld [hli], a
     pop de
     pop af
     dec a
-    jr nz, .compose_loop
+    jp nz, .compose_loop
     
     pop bc
     pop af
