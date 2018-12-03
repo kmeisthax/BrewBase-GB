@@ -186,6 +186,8 @@ TextServices_ComposeGlyphWithTile::
     
     ld a, [bc]
     inc bc
+    push bc
+    ld b, a
     
     ;TODO: Find a better way to test for zero without clobbering all our shit
     dec d
@@ -197,32 +199,29 @@ TextServices_ComposeGlyphWithTile::
     
 .positive_shift_loop
     REPT 7
-    srl a
+    srl b
     dec d
     jr z, .recolor_1bpp_graphics
     ENDR
-    srl a
+    srl b
     dec d
     jr .recolor_1bpp_graphics
     
 .negative_shift
-    push af
     xor a
     sub a, d
     ld d, a
-    pop af
     
 .negative_shift_loop
     REPT 7
-    sla a
+    sla b
     dec d
     jr z, .recolor_1bpp_graphics
     ENDR
-    sla a
+    sla b
     dec d
     
 .recolor_1bpp_graphics
-    ld d, a
     ld a, e
     and a
     jr z, .recolor_1bpp_graphics_col0
@@ -232,45 +231,46 @@ TextServices_ComposeGlyphWithTile::
     jr z, .recolor_1bpp_graphics_col2
     
 .recolor_1bpp_graphics_col3
-    ld a, d
+    ld a, b
     or a, [hl]
     ld [hli], a
-    ld a, d
+    ld a, b
     or a, [hl]
     ld [hli], a
     jr .recolor_1bpp_graphics_done
     
 .recolor_1bpp_graphics_col2
-    ld a, d
+    ld a, b
     cpl
     and a, [hl]
     ld [hli], a
-    ld a, d
+    ld a, b
     or a, [hl]
     ld [hli], a
     jr .recolor_1bpp_graphics_done
     
 .recolor_1bpp_graphics_col1
-    ld a, d
+    ld a, b
     or a, [hl]
     ld [hli], a
-    ld a, d
+    ld a, b
     cpl
     and a, [hl]
     ld [hli], a
     jr .recolor_1bpp_graphics_done
     
 .recolor_1bpp_graphics_col0
-    ld a, d
+    ld a, b
     cpl
     and a, [hl]
     ld [hli], a
-    ld a, d
+    ld a, b
     cpl
     and a, [hl]
     ld [hli], a
     
 .recolor_1bpp_graphics_done
+    pop bc
     pop de
     pop af
     dec a
