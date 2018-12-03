@@ -178,17 +178,17 @@ TextServices_DrawGlyphToWindow::
     ld e, 3 ;TODO: Pull the text window color
     
     ;TODO: VRAM banking.
-    ld a, [W_TextServices_CurrentWindowTile + 1]
+    ld hl, W_TextServices_CurrentWindowTile + 1
+    ld a, [hli]
+    ld h, [hl]
     ld l, a
-    ld a, [W_TextServices_CurrentWindowTile + 2]
-    ld h, a
-    
     call TextServices_ComposeGlyphWithTile
     
 .no_horizontal_glyph_overhang
-    ld a, [W_TextServices_CurrentHorizontalTile]
+    ld hl, W_TextServices_CurrentHorizontalTile
+    ld a, [hl]
     inc a
-    ld [W_TextServices_CurrentHorizontalTile], a
+    ld [hl], a
     
 .first_horizontal_tile
     ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphWidth]
@@ -217,11 +217,10 @@ TextServices_DrawGlyphToWindow::
     ld e, 3 ;TODO: Pull the text window color
     
     ;TODO: VRAM banking.
-    ld a, [W_TextServices_CurrentWindowTile + 1]
+    ld hl, W_TextServices_CurrentWindowTile + 1
+    ld a, [hli]
+    ld h, [hl]
     ld l, a
-    ld a, [W_TextServices_CurrentWindowTile + 2]
-    ld h, a
-    
     call TextServices_ComposeGlyphWithTile
     
     ld a, l
