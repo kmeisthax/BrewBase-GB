@@ -3,18 +3,18 @@ INCLUDE "lib/brewbase.inc"
 SECTION "Text Services - Draw Letter Main Routine Memory", WRAM0
 W_TextServices_FontHeaderCache: ds M_TextServices_FontSize
 
-W_TextServices_CurrentBaselineAdjustment: ds 1
-W_TextServices_CurrentVerticalCursor: ds 1
-W_TextServices_StartingVerticalCursor: ds 1
-W_TextServices_CurrentCacheMask: ds 1
 W_TextServices_CurrentHorizontalShift: ds 1
 W_TextServices_CurrentWindowTile: ds 3
 W_TextServices_RowStartingTile: ds 2
 
 ;The following three memory locations are assumed to be contiguous for
 ;optimization reasons:
-W_TextServices_CurrentHorizontalTile: ds 1
+W_TextServices_StartingVerticalCursor: ds 1
+W_TextServices_CurrentVerticalCursor: ds 1
+W_TextServices_CurrentBaselineAdjustment: ds 1
+W_TextServices_CurrentCacheMask: ds 1
 W_TextServices_CurrentVerticalGlyphPosition: ds 1
+W_TextServices_CurrentHorizontalTile: ds 1
 W_TextServices_CurrentGlyphBase: ds 3
 
 SECTION "Text Services - Draw Letter Main Routine", ROMX, BANK[1]
@@ -146,21 +146,22 @@ TextServices_DrawGlyphToWindow::
     ld [W_TextServices_RowStartingTile + 1], a
     
 .row_loop
-    ld a, [W_TextServices_StartingVerticalCursor]
-    ld b, a
     ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphHeight]
     ld c, a
-    ld a, [W_TextServices_CurrentVerticalCursor]
+    ld hl, W_TextServices_StartingVerticalCursor
+    ld a, [hli] ;W_TextServices_StartingVerticalCursor
+    ld b, a
+    ld a, [hli] ;W_TextServices_CurrentVerticalCursor
     ld d, a
-    ld a, [W_TextServices_CurrentBaselineAdjustment]
+    ld a, [hli] ;W_TextServices_CurrentBaselineAdjustment
     ld e, a
     call TextServices_ComputeVerticalShiftingParameters
-    ld [W_TextServices_CurrentCacheMask], a
+    ld [hli], a ;W_TextServices_CurrentCacheMask
     ld a, b
-    ld [W_TextServices_CurrentVerticalGlyphPosition], a
+    ld [hli], a ;W_TextServices_CurrentVerticalGlyphPosition
     
     xor a
-    ld [W_TextServices_CurrentHorizontalTile], a
+    ld [hli], a ;W_TextServices_CurrentHorizontalTile
     jr .first_horizontal_tile
     
 .tile_loop
@@ -199,11 +200,11 @@ TextServices_DrawGlyphToWindow::
     
     ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphHeight]
     ld b, a
-    ld hl, W_TextServices_CurrentHorizontalTile
-    ld a, [hli] ;W_TextServices_CurrentHorizontalTile
-    ld d, a
+    ld hl, W_TextServices_CurrentVerticalGlyphPosition
     ld a, [hli] ;W_TextServices_CurrentVerticalGlyphPosition
     ld e, a
+    ld a, [hli] ;W_TextServices_CurrentHorizontalTile
+    ld d, a
     ld a, [hli] ;W_TextServices_CurrentGlyphBase
     ld c, a
     ld a, [hli] ;W_TextServices_CurrentGlyphBase + 1
