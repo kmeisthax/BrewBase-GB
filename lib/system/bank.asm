@@ -126,6 +126,7 @@ System_FarCallRestricted_int::
     jp hl
 
 System_FarRead_int::
+    di
     ld [$2000], a
     
     ld a, [hli]
@@ -133,10 +134,12 @@ System_FarRead_int::
     
     ld a, [H_System_CurBank]
     ld [$2000], a
+    ei
     
     ret
 
 System_FarSnap_int::
+    di
     ld [$2000], a
     
     ld a, [hli]
@@ -147,11 +150,13 @@ System_FarSnap_int::
     
     ld a, [H_System_CurBank]
     ld [$2000], a
+    ei
     
     ld a, [H_System_FarcallTrampoline + 1]
     ret
 
 System_FarCopy_int::
+    di
     ld [$2000], a
     
 .copy_loop
@@ -166,4 +171,5 @@ System_FarCopy_int::
     
     ld a, [H_System_CurBank]
     ld [$2000], a
+    ei
     ret
