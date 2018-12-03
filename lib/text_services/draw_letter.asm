@@ -7,11 +7,14 @@ W_TextServices_CurrentBaselineAdjustment: ds 1
 W_TextServices_CurrentVerticalCursor: ds 1
 W_TextServices_StartingVerticalCursor: ds 1
 W_TextServices_CurrentCacheMask: ds 1
-W_TextServices_CurrentVerticalGlyphPosition: ds 1
-W_TextServices_CurrentHorizontalTile: ds 1
 W_TextServices_CurrentHorizontalShift: ds 1
 W_TextServices_CurrentWindowTile: ds 3
 W_TextServices_RowStartingTile: ds 2
+
+;The following three memory locations are assumed to be contiguous for
+;optimization reasons:
+W_TextServices_CurrentHorizontalTile: ds 1
+W_TextServices_CurrentVerticalGlyphPosition: ds 1
 W_TextServices_CurrentGlyphBase: ds 3
 
 SECTION "Text Services - Draw Letter Main Routine", ROMX, BANK[1]
@@ -196,16 +199,16 @@ TextServices_DrawGlyphToWindow::
     
     ld a, [W_TextServices_FontHeaderCache + M_TextServices_FontGlyphHeight]
     ld b, a
-    ld a, [W_TextServices_CurrentGlyphBase]
-    ld c, a
-    ld a, [W_TextServices_CurrentHorizontalTile]
+    ld hl, W_TextServices_CurrentHorizontalTile
+    ld a, [hli] ;W_TextServices_CurrentHorizontalTile
     ld d, a
-    ld a, [W_TextServices_CurrentVerticalGlyphPosition]
+    ld a, [hli] ;W_TextServices_CurrentVerticalGlyphPosition
     ld e, a
-    ld a, [W_TextServices_CurrentGlyphBase + 1]
+    ld a, [hli] ;W_TextServices_CurrentGlyphBase
+    ld c, a
+    ld a, [hli] ;W_TextServices_CurrentGlyphBase + 1
+    ld h, [hl]  ;W_TextServices_CurrentGlyphBase + 2
     ld l, a
-    ld a, [W_TextServices_CurrentGlyphBase + 2]
-    ld h, a
     ld a, [W_TextServices_CurrentCacheMask]
     call TextServices_PrepareGlyphForComposition
     
