@@ -221,6 +221,10 @@ LCDC_ExecuteCurrentHDMAEntry::
 ; With these pieces of information it is possible to dynamically determine if it
 ; is safe to engage in banked memory access in your idle routine.
 LCDC_ResolvePendingHDMA::
+    ld a, [W_System_ARegStartup]
+    cp M_BIOS_CPU_CGB
+    jr nz, .not_a_cgb
+    
     push af
     push de
     push hl
@@ -263,4 +267,6 @@ LCDC_ResolvePendingHDMA::
     pop hl
     pop de
     pop af
+    
+.not_a_cgb
     ret
