@@ -199,14 +199,31 @@ LCDC_ExecuteCurrentNDMAEntry::
 ;This routine clobbers REG_VBK, we assume all VRAM access will occur using this
 ;routine. If not the case, you will need to use another routine.
 LCDC_ResolvePendingNDMA::
-    ld b, M_LCDC_NDMARequestProcessingCap ;total processing time remaining
-    
     ld a, [W_System_ARegStartup]
     cp M_BIOS_CPU_CGB
-    jr z, .check_for_dirty_chunk
+    jr nz, .use_emulated_ndma_processing_cap
+    
+.use_real_ndma_processing_cap
+    ld a, [REG_LY]
+    ld b, a
+    ld a, M_LCDC_NDMAVblankTimingReferenceEnd
+    sub b
+    
+    sla a
+    sla a
+    sla a ;x8
+    ld b, a
+    jr .check_for_dirty_chunk
     
 .use_emulated_ndma_processing_cap
-    ld b, M_LCDC_NDMARequestEmulatedProcessingCap
+    ld a, [REG_LY]
+    ld b, a
+    ld a, M_LCDC_NDMAVblankTimingReferenceEnd
+    sub b
+    
+    srl a ;/2
+    ld b, a
+    jr .check_for_dirty_chunk
     
 .check_for_dirty_chunk
     ld a, [W_LCDC_CurrentVallocEntry + M_LCDC_VallocStatus]
@@ -310,4 +327,6 @@ LCDC_ResolvePendingNDMA::
     ld a, [H_System_CurRamBank]
     ld [REG_SVBK], a
     
+    ;TODO: What if the screen is off? Can we check for that?
+.vblank_missed
     ret
