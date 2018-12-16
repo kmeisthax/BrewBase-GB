@@ -45,6 +45,26 @@ Game_StateLoadScreen::
     ld a, %10000001
     ld [W_LCDC_ShadowLCDC], a
     
+    ld a, $FF
+    ld [W_LCDC_PaletteBGShadow + 0], a
+    ld a, $7F
+    ld [W_LCDC_PaletteBGShadow + 1], a
+    ld a, $52
+    ld [W_LCDC_PaletteBGShadow + 2], a
+    ld a, $4A
+    ld [W_LCDC_PaletteBGShadow + 3], a
+    ld a, $8C
+    ld [W_LCDC_PaletteBGShadow + 4], a
+    ld a, $31
+    ld [W_LCDC_PaletteBGShadow + 5], a
+    ld a, $00
+    ld [W_LCDC_PaletteBGShadow + 6], a
+    ld a, $00
+    ld [W_LCDC_PaletteBGShadow + 7], a
+    
+    ld a, M_LCDC_PalettesDirty
+    ld [W_LCDC_PaletteBGShadowStatus], a
+    
     ld a, 1
     ld [W_Game_StateMachineState], a
     
