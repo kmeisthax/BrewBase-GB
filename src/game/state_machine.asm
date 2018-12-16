@@ -75,6 +75,15 @@ Game_StateBeginDrawText::
     ld c, 0
     M_System_FarCall TextServices_SetWindowCursorPosition
     
+    ld hl, W_Game_Window
+    ld bc, $9800
+    ld d, 0
+    ld e, 0
+    M_System_FarCall TextServices_SetWindowTiles
+    
+    ld hl, W_Game_Window
+    M_System_FarCall TextServices_DrawWindowTilemap
+    
     ld a, 2
     ld [W_Game_StateMachineState], a
     
@@ -87,6 +96,7 @@ Game_StateDrawText::
     inc hl
     ld e, [hl]
     
+.loop
     ld a, [de]
     or a
     jr z, .string_done
@@ -103,6 +113,7 @@ Game_StateDrawText::
     M_System_FarCall TextServices_AddGlyphWidthToCursor
     pop de
     inc de
+    jr .loop
     
 .string_not_done
     ld hl, W_Game_StringPtr
@@ -187,6 +198,7 @@ Game_StateDrawText2::
     inc hl
     ld e, [hl]
     
+.loop
     ld a, [de]
     or a
     jr z, .string_done
@@ -203,6 +215,8 @@ Game_StateDrawText2::
     M_System_FarCall TextServices_AddGlyphWidthToCursor
     pop de
     inc de
+    
+    jr .loop
     
 .string_not_done
     ld hl, W_Game_StringPtr
