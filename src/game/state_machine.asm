@@ -40,6 +40,11 @@ Game_StateLoadScreen::
     call LCDC_CreateVallocMapping
     add sp, 4
     
+    ld a, %11100100
+    ld [W_LCDC_ShadowBGP], a
+    ld a, %10000001
+    ld [W_LCDC_ShadowLCDC], a
+    
     ld a, 1
     ld [W_Game_StateMachineState], a
     
