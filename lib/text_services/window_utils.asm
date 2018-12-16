@@ -76,6 +76,35 @@ TextServices_SetWindowBacking::
     pop de
     ret
     
+;Set a window's tilemap display location.
+;
+;(Only applicable for windows that will be displayed on a tilemap)
+; BC = VRAM pointer to first tile of the window
+; D = Index of first tile in the window
+; E = Attributes for all tiles in the window
+; HL = Near pointer to window structure
+TextServices_SetWindowTiles::
+    push af
+    
+    ld a, M_TextServices_WindowTilePtr
+    add a, l
+    ld l, a
+    ld a, h
+    adc a, 0
+    ld h, a
+    
+    ld a, c
+    ld [hli], a
+    ld a, b
+    ld [hli], a
+    ld a, d
+    ld [hli], a
+    ld a, e
+    ld [hli], a
+    
+    pop af
+    ret
+    
 ;Position a window's text cursor.
 ;
 ; B = Cursor X position in pixels

@@ -49,12 +49,18 @@ M_TextServices_WindowCursorX EQU $4  ;X coordinate of position to draw to
 M_TextServices_WindowCursorY EQU $5  ;Y coordinate of position to draw to
 M_TextServices_WindowCursor EQU $6   ;Near pointer to current cursor tile.
 
-;2 bytes of padding [8,$A)
-
 ;The Font is the set of glyphs used to draw text.
-M_TextServices_WindowFont EQU $A     ;Far pointer to font structure
+M_TextServices_WindowFont EQU $8     ;Far pointer to font structure
 
-M_TextServices_WindowBacking EQU $D  ;Far pointer to writable memory buffer
+M_TextServices_WindowBacking EQU $B  ;Far pointer to writable memory buffer
                                      ;large enough to store Width*Height tiles.
 
-M_TextServices_WindowSize EQU $10
+;Windows need to be displayed through a tilemap, so these parameters configure
+;how the tilemap should be displayed.
+M_TextServices_WindowTilePtr EQU $E  ;Near pointer to the tilemap location to
+                                     ;draw onto (must be VRAM)
+M_TextServices_WindowTileIndex EQU $10 ;Index of the VRAM tile that the window
+                                       ;occupies.
+M_TextServices_WindowTileAttr EQU $11 ;Attrs to place on each tile.
+
+M_TextServices_WindowSize EQU $12
