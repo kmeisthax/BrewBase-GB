@@ -18,9 +18,6 @@ main::
     ld a, $80
     ld [W_LCDC_ShadowLCDC], a
     
-    ld a, $08
-    ld [W_LCDC_ShadowSTAT], a
-    
     ei
     
     ;Executed once per frame.

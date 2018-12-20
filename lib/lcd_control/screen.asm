@@ -2,7 +2,6 @@ INCLUDE "lib/brewbase.inc"
 
 SECTION "LCDC Screen Memory", WRAM0
 W_LCDC_ShadowLCDC:: ds 1
-W_LCDC_ShadowSTAT:: ds 1
 W_LCDC_ShadowSCY:: ds 1
 W_LCDC_ShadowSCX:: ds 1
 W_LCDC_ShadowWY:: ds 1
@@ -26,8 +25,6 @@ LCDC_ScreenControlUpdate::
     
     ld a, [W_LCDC_ShadowLCDC]
     ld [REG_LCDC], a
-    ld a, [W_LCDC_ShadowSTAT]
-    ld [REG_STAT], a
     ld a, [W_LCDC_ShadowSCY]
     ld [REG_SCY], a
     ld a, [W_LCDC_ShadowSCX]
