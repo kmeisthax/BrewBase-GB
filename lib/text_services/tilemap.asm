@@ -38,6 +38,7 @@ TextServices_DrawWindowTilemap::
     push de
 
 .tile_tile_loop
+    di
     
     ;TIMING CRITICAL AREA
 .tile_vram_sync
@@ -48,6 +49,8 @@ TextServices_DrawWindowTilemap::
 .tile_vram_safe
     ld [hl], b
     ;END TIMING CRITICAL AREA
+    
+    ei
     
 .tile_end_tile_loop
     inc b
@@ -85,6 +88,7 @@ TextServices_DrawWindowTilemap::
     push de
 
 .attr_tile_loop
+    di
     
     ;TIMING CRITICAL AREA
 .attr_vram_sync
@@ -95,6 +99,8 @@ TextServices_DrawWindowTilemap::
 .attr_vram_safe
     ld [hl], c
     ;END TIMING CRITICAL AREA
+    
+    ei
     
 .attr_end_tile_loop
     inc hl

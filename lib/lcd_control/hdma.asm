@@ -64,15 +64,10 @@ LCDC_ExecuteCurrentHDMAEntry::
     ;to compute conditionals and write the HDMA5 value in less time than LCDC
     ;could possibly move to mode 0.
     ;
-    ;If we wait for Mode 2, then we have a buffer equal to the shortest possible
-    ;Mode 3 timing. Pandocs claims Mode 3 is a minimum of 170 cycles, which
-    ;exceeds the critical path timing determined above. If we were to check for
-    ;mode 3, it is possible that we would read a 3 right before entering mode 0,
-    ;which would be bad. If Mode 2 didn't exist, then we would have to check for
-    ;the end of mode 0 instead, i.e. check for mode 0, then check for mode 3.
-    ;The last concern is how likely we are to miss mode 2 entirely. Since it's
-    ;supposedly 80 cycles long, which is almost twice as long as the check loop,
-    ;we have multiple chances to read Mode 2.
+    ;We actually check for mode 0 and then mode 2 to ensure that we are
+    ;synchronized with the start of OAM Search.
+    di
+    
 .wait_for_not_blanking
     ld a, [REG_STAT]
     and $03
@@ -82,6 +77,7 @@ LCDC_ExecuteCurrentHDMAEntry::
     ld a, c
     or $80
     ld [REG_HDMA5], a   ;Trigger the actual HDMA transfer
+    ei
     
     ;At this point, HDMA is active, but so is our CPU. HDMA steals cycles so we
     ;just need to stop it if we're running into Vblank.
