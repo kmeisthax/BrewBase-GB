@@ -6,6 +6,7 @@ W_LCDC_ShadowSCY:: ds 1
 W_LCDC_ShadowSCX:: ds 1
 W_LCDC_ShadowWY:: ds 1
 W_LCDC_ShadowWX:: ds 1
+W_LCDC_ShadowLYC:: ds 1
 W_LCDC_ShadowBGP:: ds 1
 W_LCDC_ShadowOBP0:: ds 1
 W_LCDC_ShadowOBP1:: ds 1
@@ -33,6 +34,8 @@ LCDC_ScreenControlUpdate::
     ld [REG_WY], a
     ld a, [W_LCDC_ShadowWX]
     ld [REG_WX], a
+    ld a, [W_LCDC_ShadowLYC]
+    ld [REG_LYC], a
     ld a, [W_LCDC_ShadowBGP]
     ld [REG_BGP], a
     ld a, [W_LCDC_ShadowOBP0]
