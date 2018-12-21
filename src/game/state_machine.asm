@@ -45,6 +45,24 @@ Game_StateLoadScreen::
     ld a, %10000001
     ld [W_LCDC_ShadowLCDC], a
     
+    ld a, 8
+    ld [W_LCDC_ShadowLYC], a
+    
+    ld hl, Game_StatIRQHandler
+    call LCDC_HBlankInit
+    
+    ld a, %01000000
+    ld [REG_STAT], a
+    
+    ;If a spurious interrupt was generated, kill it
+    ld a, [REG_IF]
+    res 1, a
+    ld [REG_IF], a
+    
+    ld a, [REG_IE]
+    set 1, a
+    ld [REG_IE], a
+    
     ld a, $FF
     ld [W_LCDC_PaletteBGShadow + 0], a
     ld a, $7F
