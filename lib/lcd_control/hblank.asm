@@ -3,7 +3,7 @@ INCLUDE "lib/brewbase.inc"
 SECTION "BBase HBlank Services Memory", WRAM0
 W_LCDC_HBlankInstr:: ds 3 ;Hblank handler.
                           ;Always holds a jp to the current code.
-SECTION "BBase HBlank Services Memory", HRAM
+SECTION "BBase HBlank Services High Memory", HRAM
 H_LCDC_HBlankARegPreserve:: ds 1
 
 SECTION "BBase HBlank Services IRQ Handler", ROM0[$0048]
@@ -19,6 +19,18 @@ SECTION "BBase HBlank Services IRQ Handler", ROM0[$0048]
 ;
 ;  pop af
 ;  reti
+;
+;Timing information: When using StatIRQ handlers exclusively for LYC or HBlank
+;interrupts, user code will have at least 88 cycles to operate in the worst case
+;scenario. This is assuming we cannot make use of Mode 2 cycles and the previous
+;scanline rendered 10 sprites. This is still enough cycles to write 4 I/O ports
+;or a single OAM entry. If you can make use of Mode 2 cycles, then that
+;almost doubles to 168 cycles or 8 I/O port writes.
+;
+;You should take care not to overtune the timings on StatIRQ interrupts as these
+;cycles are stolen from gameloop code. Gameloop code is permitted to access VRAM
+;during H-Blank, and will disable interrupts whilst doing so. As a result, your
+;HBlank handler may have less time in order to accomplish the same task.
 LCDC_StatIRQ::
     push af
     jp W_LCDC_HBlankInstr
@@ -26,7 +38,14 @@ LCDC_StatIRQ::
 SECTION "LCDC H-Blank Utilities", ROM0
 ;Install a given StatIRQ handler into HBlankInstr.
 ;
-; HL = Function pointer to call every IRQ.
+; HL = Near function pointer to call every IRQ.
+; 
+; NOTE: StatIRQ handlers cannot be banked (ROM, WRAM, or SRAM). You must ensure
+; that the memory HL points to is always accessible at any time. Typically,
+; this means using unbanked memory only. This is because the additional time
+; to process banking correctly could significantly reduce the amount of H-Blank
+; time available to user code. If you require banking, you must juggle the banks
+; yourself.
 LCDC_HBlankInit::
     push af
     
