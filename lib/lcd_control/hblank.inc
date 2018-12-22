@@ -17,7 +17,7 @@ M_LCDC_HBlankYield: MACRO
 ;Slightly different "yield" macro that allows queueing a different bit of code
 ;instead of the following instruction upon resumption of the StatIRQ coroutine.
 M_LCDC_HBlankYieldJp: MACRO
-    ld a, (\1 % $FF)
+    ld a, (\1 & $FF)
     ld [H_LCDC_HBlankInstr + 1], a
     ld a, (\1 >> 8)
     ld [H_LCDC_HBlankInstr + 2], a
