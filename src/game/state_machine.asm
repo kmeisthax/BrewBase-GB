@@ -45,7 +45,7 @@ Game_StateLoadScreen::
     ld a, %10000001
     ld [W_LCDC_ShadowLCDC], a
     
-    ld a, 8
+    ld a, $20
     ld [W_LCDC_ShadowLYC], a
     
     ld hl, Game_StatIRQHandler

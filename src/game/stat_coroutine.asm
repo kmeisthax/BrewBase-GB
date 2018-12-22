@@ -2,32 +2,30 @@ INCLUDE "lib/brewbase.inc"
 
 SECTION "Test Case StatIRQ Coroutine", ROM0
 Game_StatIRQHandler::
-    ld a, $10
+    ld a, $E0
     ld [REG_SCY], a
-    ld a, $10
+    ld a, $40
     ld [REG_LYC], a
     M_LCDC_HBlankYield
     
-    ld a, $4
+    ld a, $E0
     ld [REG_SCY], a
-    ld a, $12
+    ld a, $40
     ld [REG_LYC], a
     M_LCDC_HBlankYield
     
-    ld a, $0
+.break_loop
+    ld a, $C0
     ld [REG_SCY], a
-    ld a, $14
-    ld [REG_LYC], a
-    M_LCDC_HBlankYield
-    
-    ld a, $0F
+    ld a, $BF
     ld [REG_SCY], a
-    ld a, $15
-    ld [REG_LYC], a
-    M_LCDC_HBlankYield
-    
-    ld a, 0
+    ld a, $BE
     ld [REG_SCY], a
-    ld a, $FF
+    ld a, $BD
+    ld [REG_SCY], a
+    ld a, $BC
+    ld [REG_SCY], a
+    ld a, [REG_LYC]
+    inc a
     ld [REG_LYC], a
-    M_LCDC_HBlankYieldJp Game_StatIRQHandler
+    M_LCDC_HBlankYieldJp .break_loop
