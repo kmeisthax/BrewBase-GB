@@ -49,7 +49,7 @@ Game_StateLoadScreen::
     ld [W_LCDC_ShadowLYC], a
     
     ld hl, Game_StatIRQHandler
-    call LCDC_HBlankInit
+    call LCDC_HBlankQueueCoroutine
     
     ld a, %01000000
     ld [REG_STAT], a

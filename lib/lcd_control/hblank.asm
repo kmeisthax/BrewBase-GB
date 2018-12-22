@@ -5,6 +5,10 @@ H_LCDC_HBlankARegPreserve:: ds 1
 H_LCDC_HBlankInstr:: ds 3 ;Hblank handler.
                           ;Always holds a jp to the current code.
 
+SECTION "BBase HBlank Services Regular Memory", WRAM0
+W_LCDC_HBlankStart:: ds 2 ;Hblank handler.
+                          ;Pointer to the start of the StatIRQ coroutine.
+
 SECTION "BBase HBlank Services IRQ Handler", ROM0[$0048]
 ;The actual STAT interrupt handler.
 ;
@@ -35,7 +39,11 @@ LCDC_StatIRQ::
     jp H_LCDC_HBlankInstr
 
 SECTION "LCDC H-Blank Utilities", ROM0
-;Install a given StatIRQ handler into HBlankInstr.
+;Queue a new HBlank coroutine to be started next frame.
+;
+;Using QueueCoroutine and ShadowLYC, your Vblank routine can automatically
+;manage your HBlank effects for you. You only have to provide a valid coroutine
+;to be run.
 ;
 ; HL = Near function pointer to call every IRQ.
 ; 
@@ -45,14 +53,29 @@ SECTION "LCDC H-Blank Utilities", ROM0
 ; to process banking correctly could significantly reduce the amount of H-Blank
 ; time available to user code. If you require banking, you must juggle the banks
 ; yourself.
-LCDC_HBlankInit::
+LCDC_HBlankQueueCoroutine::
+    push af
+    
+    ld a, l
+    ld [W_LCDC_HBlankStart + 0], a
+    ld a, h
+    ld [W_LCDC_HBlankStart + 1], a
+    
+    pop af
+    ret
+
+;Restart the currently queued HBlank coroutine.
+;
+;This function should optimally be called during VBlank. It will set up the
+;currently queued HBlank routine to be run again.
+LCDC_HBlankRestartCoroutine::
     push af
     
     ld a, $C3
     ld [H_LCDC_HBlankInstr], a
-    ld a, l
+    ld a, [W_LCDC_HBlankStart + 0]
     ld [H_LCDC_HBlankInstr + 1], a
-    ld a, h
+    ld a, [W_LCDC_HBlankStart + 1]
     ld [H_LCDC_HBlankInstr + 2], a
     
     pop af

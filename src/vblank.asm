@@ -12,6 +12,7 @@ vblank::
     call LCDC_FlushOBPShadow
     call LCDC_VBlankOAMTransfer
     call LCDC_ResolvePendingNDMA
+    call LCDC_HBlankRestartCoroutine
     
     ld a, 1
     ld [W_LCDC_VBlankExecuted], a
