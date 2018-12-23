@@ -1,6 +1,6 @@
 INCLUDE "lib/brewbase.inc"
 
-SECTION "BBase HBlank Services High Memory", HRAM
+SECTION "BBase HBlank Services High Memory", HRAM[$FFFB]
 H_LCDC_HBlankARegPreserve:: ds 1
 H_LCDC_HBlankInstr:: ds 3 ;Hblank handler.
                           ;Always holds a jp to the current code.
@@ -36,7 +36,7 @@ SECTION "BBase HBlank Services IRQ Handler", ROM0[$0048]
 ;HBlank handler may have less time in order to accomplish the same task.
 LCDC_StatIRQ::
     push af
-    jp H_LCDC_HBlankInstr
+    jr H_LCDC_HBlankInstr
 
 SECTION "LCDC H-Blank Utilities", ROM0
 ;Queue a new HBlank coroutine to be started next frame.
