@@ -15,27 +15,37 @@ Game_StatIRQHandler::
     M_LCDC_HBlankYield
     
 .break_loop
+    push bc
+    ld c, REG_SCY & $FF
     ld a, $B3
-    ld [REG_SCY], a
-    ld a, $B6
-    ld [REG_SCY], a
-    ld a, $B9
-    ld [REG_SCY], a
-    ld a, $BC
-    ld [REG_SCY], a
-    ld a, $BF
-    ld [REG_SCY], a
-    ld a, $C2
-    ld [REG_SCY], a
+    ld [c], a
+    ld a, $B5
+    ld [c], a
+    ld a, $B7
+    ld [c], a
+    ld a, $B5
+    ld [c], a
+    ld a, $B3
+    ld [c], a
+    ld a, $B1
+    ld [c], a
+    ld a, $B3
+    ld [c], a
+    ld a, $B5
+    ld [c], a
+    ld a, $B7
+    ld [c], a
     ld a, $B0
-    ld [REG_SCY], a
+    ld [c], a
+    pop bc
+    
     ld a, [REG_LYC]
     inc a
-    cp M_LCDC_HDMARequestVblankScreenLine
-    jr z, .exit
     ld [REG_LYC], a
+    
     M_LCDC_HBlankYieldJp .break_loop
     
 .exit
+    pop bc
     pop af
     reti
