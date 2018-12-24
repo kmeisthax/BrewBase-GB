@@ -97,7 +97,7 @@ Game_StateBeginDrawText::
     ld [hl], c
     
     ld hl, W_Game_Window
-    ld d, 16
+    ld d, 20
     ld e, 4
     ld b, 12
     ld c, 10
@@ -120,7 +120,7 @@ Game_StateBeginDrawText::
     
     ld hl, W_Game_Window
     ld bc, $9800
-    ld d, 0
+    ld d, $10
     ld e, 0
     M_System_FarCall TextServices_SetWindowTiles
     
@@ -196,7 +196,7 @@ Game_StateDrawText::
     ret
     
 .text
-    db "But it refused.", 0
+    db "But it refused......", 0
 .text_end
     
 Game_StateBeginDrawText2::
@@ -208,7 +208,7 @@ Game_StateBeginDrawText2::
     ld [hl], c
     
     ld hl, W_Game_Window
-    ld d, 16
+    ld d, 20
     ld e, 4
     ld b, 12
     ld c, 10
@@ -299,5 +299,5 @@ Game_StateDrawText2::
     ret
     
 .text
-    db "But nobody came.", 0
+    db "But nobody came............................................", 0
 .text_end
