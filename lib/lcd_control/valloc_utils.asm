@@ -41,10 +41,12 @@ LCDC_CreateVallocMapping::
     ld a, d
     ld [hli], a
     
+    di
     add sp, 4
     pop bc
     pop de
     add sp, -8
+    ei
     
     ld a, c
     ld [hli], a
