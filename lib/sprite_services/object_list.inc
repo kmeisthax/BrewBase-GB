@@ -27,19 +27,24 @@ M_SpriteServices_ObjectSprite EQU 5 ;Far pointer to start of metasprite data.
                                     ;Metasprite data consists of a series of
                                     ;OAM sprite commands and other ancillary
                                     ;data.
-M_SpriteServices_ObjectSpriteLine EQU 8 ;Near pointer to the start of the
+M_SpriteServices_ObjectSpriteCount EQU 8 ;Number of sprites in sprite list.
+M_SpriteServices_ObjectSpriteLine EQU 9 ;Near pointer to the start of the
                                         ;current line of sprites.
-M_SpriteServices_ObjectScript EQU $A ;Near pointer to the next script
-                                     ;instruction to execute.
-M_SpriteServices_ObjectScriptReset EQU $C ;Near pointer to the start of the
-                                          ;animation script.
-M_SpriteServices_ObjectAnimDelay EQU $E ;Number of animation frames to wait
-                                        ;until the current 
-M_SpriteServices_ObjectState EQU $F ;Arbitrary object state value to be used by
+M_SpriteServices_ObjectSpriteRemain EQU $B ;Number of sprites remaining
+M_SpriteServices_ObjectSize EQU $10 ;$C used, 3 bytes slack
+
+M_SpriteServices_AnimObject EQU $0 ;Near pointer to object being animated.
+M_SpriteServices_AnimScript EQU $2 ;Near pointer to the next script instruction
+                                   ;to execute.
+M_SpriteServices_AnimScriptReset EQU $4 ;Near pointer to the start of the
+                                        ;animation script.
+M_SpriteServices_AnimDelay EQU $6 ;Number of animation frames to wait until
+                                  ;script execution resumes
+M_SpriteServices_AnimState EQU $7 ;Arbitrary object state value to be used by
                                     ;the script to select an animation. Can
                                     ;enumerate things such as a walking
                                     ;direction or something else.
-M_SpriteServices_ObjectSize EQU $10
+M_SpriteServices_AnimSize EQU $8
 
 ;Object Status Bits
 M_SpriteServices_ObjectStatusUnused EQU 0 ;Object slot not in use.
