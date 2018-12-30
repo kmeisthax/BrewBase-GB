@@ -1,3 +1,4 @@
+;Object structure
 M_SpriteServices_ObjectStatus EQU 0 ;Object Status (bitfield, see below)
 M_SpriteServices_ObjectXPos EQU 1 ;X Position of object (OAM coordinates)
 M_SpriteServices_ObjectYPos EQU 2 ;Y Position of object (OAM coordinates)
@@ -33,19 +34,6 @@ M_SpriteServices_ObjectSpriteLine EQU 9 ;Near pointer to the start of the
 M_SpriteServices_ObjectSpriteRemain EQU $B ;Number of sprites remaining
 M_SpriteServices_ObjectSize EQU $10 ;$C used, 3 bytes slack
 
-M_SpriteServices_AnimObject EQU $0 ;Near pointer to object being animated.
-M_SpriteServices_AnimScript EQU $2 ;Near pointer to the next script instruction
-                                   ;to execute.
-M_SpriteServices_AnimScriptReset EQU $4 ;Near pointer to the start of the
-                                        ;animation script.
-M_SpriteServices_AnimDelay EQU $6 ;Number of animation frames to wait until
-                                  ;script execution resumes
-M_SpriteServices_AnimState EQU $7 ;Arbitrary object state value to be used by
-                                    ;the script to select an animation. Can
-                                    ;enumerate things such as a walking
-                                    ;direction or something else.
-M_SpriteServices_AnimSize EQU $8
-
 ;Object Status Bits
 M_SpriteServices_ObjectStatusUnused EQU 0 ;Object slot not in use.
 M_SpriteServices_ObjectStatusValid EQU $1 ;When set, object slot is in use and
@@ -62,25 +50,41 @@ M_SpriteServices_ObjectStatusPlaying EQU $8 ;When set, object delay counters
                                             ;zero, object animation scripts may
                                             ;execute (if they exist).
 
-;Object Script Opcodes
-M_SpriteServices_ObjectScriptSPR EQU $E0
+;Object Animation structure
+M_SpriteServices_AnimObject EQU $0 ;Near pointer to object being animated.
+M_SpriteServices_AnimScript EQU $2 ;Near pointer to the next script instruction
+                                   ;to execute.
+M_SpriteServices_AnimScriptReset EQU $4 ;Near pointer to the start of the
+                                        ;animation script.
+M_SpriteServices_AnimDelay EQU $6 ;Number of animation frames to wait until
+                                  ;script execution resumes
+M_SpriteServices_AnimState EQU $7 ;Arbitrary object state value to be used by
+                                    ;the script to select an animation. Can
+                                    ;enumerate things such as a walking
+                                    ;direction or something else.
+M_SpriteServices_AnimSize EQU $8
+
+;Animation Script Opcodes
+M_SpriteServices_AnimScriptSPR EQU $E0
     ;SPR - Operands: Count of sprites, followed by OAM sprite data
     ;
     ; Sets ObjectSprite and ObjectSpriteLine for the current sprite slot.
+    ; The animator executing this script must have a valid sprite slot to set
+    ; sprites on, otherwise this is a null operation.
     ; 
     ; Up to 255 sprites worth of data may follow the SPR instruction and it's
     ; length opcode. This sprite data shall be mixed with the base values for
     ; the given object slot in order to generate sprite data every frame.
-M_SpriteServices_ObjectScriptJMP EQU $E1
+M_SpriteServices_AnimScriptJMP EQU $E1
     ;JMP - Operands: Near pointer to further code to execute
     ;
-    ; Changes the location of the next instruction (ObjectScript) to the
+    ; Changes the location of the next instruction (AnimScript) to the
     ; given operand.
-M_SpriteServices_ObjectScriptBRA EQU $E2
+M_SpriteServices_AnimScriptBRA EQU $E2
     ;BRA - Operands: The lower bound, the upper bound, followed by a list of
     ;                pointers to other bits of script to execute.
     ;
-    ; Changes the location of the next instruction (ObjectScript) to a given
+    ; Changes the location of the next instruction (AnimScript) to a given
     ; script, based on the state (ObjectState). The state bounds consist of a
     ; lower and upper bound, in that order. A state value less than the lower
     ; bound, or greater than or equal to the upper bound, will not cause a
@@ -96,14 +100,14 @@ M_SpriteServices_ObjectScriptBRA EQU $E2
     ; .reset
     ;   BRA 0, 3, .up, .right, .bottom, .left
     ;   STOP 0
-M_SpriteServices_ObjectScriptDELAY EQU $E3
+M_SpriteServices_AnimScriptDELAY EQU $E3
     ;DELAY - Operands: A frame count to delay for
     ; 
     ; Pauses script execution for some number of frames. During this time, the
     ; last installed sprite list will continue to be visible. No further script
     ; commands will execute until the delay counter associated with this object
     ; has elapsed.
-M_SpriteServices_ObjectScriptSTOP EQU $E4
+M_SpriteServices_AnimScriptSTOP EQU $E4
     ;STOP - Operands: A frame count to delay for
     ;
     ; Stop script animation by revoking the Playing status bit.
