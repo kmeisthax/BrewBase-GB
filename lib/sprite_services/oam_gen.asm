@@ -1,3 +1,7 @@
+INCLUDE "lib/brewbase.inc"
+
+SECTION "Sprite Services Object-to-OAM Generation", ROMX, BANK[1]
+
 ;Apply an object slot's parameters to an OAM sprite in memory.
 ;
 ; DE = Object slot structure
