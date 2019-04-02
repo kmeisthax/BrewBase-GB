@@ -39,6 +39,16 @@ LCDC_StatIRQ::
     jr H_LCDC_HBlankInstr
 
 SECTION "LCDC H-Blank Utilities", ROM0
+;Initialize the HBlank system for use.
+;Until this function is called, it is not safe to process STAT interrupts.
+LCDC_HBlankInit::
+    ld hl, LCDC_HBlankNop
+    jp LCDC_HBlankQueueCoroutine
+
+LCDC_HBlankNop::
+    pop af
+    reti
+
 ;Queue a new HBlank coroutine to be started next frame.
 ;
 ;Using QueueCoroutine and ShadowLYC, your Vblank routine can automatically
