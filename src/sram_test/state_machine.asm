@@ -18,7 +18,7 @@ SRAMTest_StateMachine::
     
 .table
     dw SRAMTest_StateLoadScreen
-    dw SRAMTest_PersistenceText
+    dw SRAMTest_CheckPersistence
     dw SRAMTest_DrawPersistenceText
 .table_end
 
@@ -73,8 +73,20 @@ SRAMTest_StateLoadScreen::
     
     ret
 
-SRAMTest_PersistenceText::
-    ld bc, .text
+SRAMTest_CheckPersistence::
+    call SRAMTest_CheckHeader
+    cp a, 0
+
+    jr z, .no_persistence
+
+.has_persistence
+    ld bc, .persist_success_text
+    jr .queue_text
+
+.no_persistence
+    ld bc, .persist_failure_text
+
+.queue_text
     call SRAMTest_QueueText
     
     ld a, 2
@@ -82,9 +94,12 @@ SRAMTest_PersistenceText::
 
     ret
 
-.text
-    db "Persistence: ", 0
-.text_end
+.persist_success_text
+    db "Persistence: SAVE PRESENT", 0
+.persist_success_text_end
+.persist_failure_text
+    db "Persistence: SAVE NOT PRESENT", 0
+.persist_failure_text_end
 
 SRAMTest_DrawPersistenceText::
     call SRAMTest_DrawText
