@@ -55,9 +55,9 @@ SRAMTest_InstallHeader::
 
     call Cart_OpenSaveData
 
-    ld hl, SRAMTest_Header
+    ld hl, $A000
     ld de, SRAMTest_Header.end - SRAMTest_Header
-    ld bc, $A000
+    ld bc, SRAMTest_Header
 
 .loop
     ld a, [bc]
