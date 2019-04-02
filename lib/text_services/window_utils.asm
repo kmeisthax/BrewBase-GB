@@ -165,6 +165,66 @@ TextServices_SetWindowCursorPosition::
     pop de
     pop af
     ret
+    
+;Position a window's X position only.
+;
+; B = Cursor X position in pixels
+; HL = Near pointer to window structure
+TextServices_SetWindowCursorX::
+    push af
+    push de
+    
+    ld de, M_TextServices_WindowCursorX
+    add hl, de
+    
+    ld a, b
+    ld [hli], a
+    
+    ld a, [hli]
+    ld c, a
+    
+    push hl
+    
+    ld de, (M_TextServices_WindowWidth - M_TextServices_WindowCursor)
+    add hl, de
+    ld d, [hl]
+    
+    push de
+    
+    ld de, ((M_TextServices_WindowBacking + 1) - M_TextServices_WindowWidth)
+    add hl, de
+    ld a, [hli]
+    ld h, [hl]
+    ld l, a
+    
+    pop af
+    push bc
+    
+    srl c
+    srl c
+    srl c
+    call TextServices_IncrementByTileRows
+    
+    pop bc
+    
+    srl b
+    srl b
+    srl b
+    ld a, b
+    call TextServices_IncrementByTiles
+    
+    ld d, h
+    ld e, l
+    
+    pop hl
+    ld a, e
+    ld [hli], a
+    ld a, d
+    ld [hli], a
+    
+    pop de
+    pop af
+    ret
 
 ;Add an offset to a window's text cursor.
 ;

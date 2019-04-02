@@ -47,6 +47,27 @@ SRAMTest_ConsoleInit::
     pop hl
     ret
 
+SRAMTest_ConsoleNewline::
+    push hl
+    push de
+    push bc
+    push af
+
+    ld hl, W_Game_Window
+    ld b, 0
+    M_System_FarCall TextServices_SetWindowCursorX
+
+    ld hl, W_Game_Window
+    ld b, 0
+    ld c, 8
+    M_System_FarCall TextServices_AdjustWindowCursorPosition
+
+    pop af
+    pop bc
+    pop de
+    pop hl
+    ret
+
 ;Queue a string to be drawn to the screen.
 ;
 ;BC = Pointer to string to draw (in same bank)

@@ -18,8 +18,10 @@ SRAMTest_StateMachine::
     
 .table
     dw SRAMTest_StateLoadScreen
-    dw SRAMTest_CheckPersistence
-    dw SRAMTest_DrawPersistenceText
+    dw SRAMTest_StateCheckPersistence
+    dw SRAMTest_StateDrawPersistenceText
+    dw SRAMTest_StateTestInstallHeader
+    dw SRAMTest_StateDrawHeaderText
 .table_end
 
 .invalid_state
@@ -73,18 +75,18 @@ SRAMTest_StateLoadScreen::
     
     ret
 
-SRAMTest_CheckPersistence::
+SRAMTest_StateCheckPersistence::
     call SRAMTest_CheckHeader
     cp a, 0
 
     jr z, .no_persistence
 
 .has_persistence
-    ld bc, .persist_success_text
+    ld bc, .success_text
     jr .queue_text
 
 .no_persistence
-    ld bc, .persist_failure_text
+    ld bc, .failure_text
 
 .queue_text
     call SRAMTest_QueueText
@@ -94,19 +96,59 @@ SRAMTest_CheckPersistence::
 
     ret
 
-.persist_success_text
+.success_text
     db "Persistence: SAVE PRESENT", 0
-.persist_success_text_end
-.persist_failure_text
+.success_text_end
+.failure_text
     db "Persistence: SAVE NOT PRESENT", 0
-.persist_failure_text_end
+.failure_text_end
 
-SRAMTest_DrawPersistenceText::
+SRAMTest_StateDrawPersistenceText::
     call SRAMTest_DrawText
     cp a, 0
     ret z
     
     ld a, 3
+    ld [W_SRAMTest_StateMachineState], a
+
+    ret
+
+SRAMTest_StateTestInstallHeader::
+    call SRAMTest_ConsoleNewline
+    call SRAMTest_InstallHeader
+    call SRAMTest_CheckHeader
+    cp a, 0
+
+    jr z, .no_header
+
+.has_header
+    ld bc, .success_text
+    jr .queue_text
+
+.no_header
+    ld bc, .failure_text
+
+.queue_text
+    call SRAMTest_QueueText
+    
+    ld a, 4
+    ld [W_SRAMTest_StateMachineState], a
+
+    ret
+
+.success_text
+    db "Header: PASS", 0
+.success_text_end
+.failure_text
+    db "Header: FAIL", 0
+.failure_text_end
+
+SRAMTest_StateDrawHeaderText::
+    call SRAMTest_DrawText
+    cp a, 0
+    ret z
+    
+    ld a, 5
     ld [W_SRAMTest_StateMachineState], a
 
     ret

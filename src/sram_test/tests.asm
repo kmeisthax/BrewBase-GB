@@ -28,6 +28,8 @@ SRAMTest_CheckHeader::
     jr nz, .loop
 
     ld a, 1
+
+    call Cart_CloseSaveData
     
     pop bc
     pop de
@@ -37,6 +39,36 @@ SRAMTest_CheckHeader::
 .test_failure
     ld a, 0
 
+    call Cart_CloseSaveData
+
+    pop bc
+    pop de
+    pop hl
+    ret
+
+;Install the test header
+SRAMTest_InstallHeader::
+    push hl
+    push de
+    push bc
+    push af
+
+    call Cart_OpenSaveData
+
+    ld hl, SRAMTest_Header
+    ld de, SRAMTest_Header.end - SRAMTest_Header
+    ld bc, $A000
+
+.loop
+    ld a, [bc]
+    ld [hli], a
+    inc bc
+    dec de
+    jr nz, .loop
+
+    call Cart_CloseSaveData
+
+    pop af
     pop bc
     pop de
     pop hl
