@@ -13,12 +13,15 @@ main::
     call System_HiMemoryInit
     call System_BankInit
     call LCDC_VBlankInit
+    call LCDC_HBlankInit
     
     ;Enable LCD display and VBlank interrupts by default.
     ld a, $80
     ld [W_LCDC_ShadowLCDC], a
     
     ei
+
+    call System_EnableDoubleSpeed
     
     ;Executed once per frame.
     ;Place code here that needs to run once per frame in non-interrupt context.
@@ -27,7 +30,7 @@ main::
 .gameLoop
     xor a
     ld [W_LCDC_VBlankExecuted], a
-    M_System_FarCall Game_StateMachine
+    M_System_FarCall SRAMTest_StateMachine
     call LCDC_ResolvePendingHDMA
     
     ;Stop processing until we get a Vblank interrupt.
